@@ -22,7 +22,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
  * 作者: lishuyi@simbest.com.cn
  * 时间: 2021/3/9  19:07
  */
-//libeixiao
 @Slf4j
 @EnableWebSecurity
 public class MultiHttpSecurityConfig {

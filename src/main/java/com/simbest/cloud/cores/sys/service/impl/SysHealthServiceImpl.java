@@ -9,6 +9,7 @@ import com.simbest.cloud.cores.config.EmbeddedServletConfiguration;
 import com.simbest.cloud.cores.config.ExtraConfig;
 import com.simbest.cloud.cores.constants.ApplicationConstants;
 import com.simbest.cloud.cores.enums.StoreLocation;
+import com.simbest.cloud.cores.exceptions.Exceptions;
 import com.simbest.cloud.cores.sys.model.SysFile;
 import com.simbest.cloud.cores.sys.model.SysHealth;
 import com.simbest.cloud.cores.sys.service.IHeartTestService;
@@ -29,10 +30,15 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.io.File;
+import java.util.List;
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import static com.simbest.cloud.cores.config.AppConfig.uploadTmpFileDir;
 import static com.simbest.cloud.cores.constants.ApplicationConstants.UTF_8;
 import static com.simbest.cloud.orguser.pojo.JsonResponse.MSG_FILE_CHECK;
+import static com.simbest.cloud.orguser.pojo.JsonResponse.ZERO;
 
 /**
  * 用途：系统健康检查服务层
@@ -64,8 +70,10 @@ public class SysHealthServiceImpl implements ISysHealthService, IHeartTestServic
 
     private SysFile testSysFile;
 
+    private SortedMap<String,Object> datasourcePropertyMapUrl = new TreeMap<>();
+
     /**
-     * @see com.simbest.cloud.component.task.HeartTestTask
+     * @see com.simbest.cloud.cores.components.schedules.HeartTestTask
      */
     @PostConstruct
     public void init() throws Exception {
@@ -77,27 +85,38 @@ public class SysHealthServiceImpl implements ISysHealthService, IHeartTestServic
                 testSysFile = appFileUtil.uploadFromLocalAutoDirectory(uploadTmpFileDir, notExistLocalFile,  null);
             }
         }
+
+        //获取应用中的所有数据库URL配置信息
+        SortedMap<String,Object> datasourcePropertyMap = config.getDatasourcePropertyMap();
+        for (Map.Entry<String, Object> m : datasourcePropertyMap.entrySet()) {
+            if(m.getKey().contains(".url")) {
+                datasourcePropertyMapUrl.put(m.getKey(), m.getValue());
+            }
+        }
+
     }
 
-    //libeixiao
     @Override
     public SysHealth databaseCheck(){
-//        try {
-//            List result = jdbcTemplate.queryForList(validationQuery);
-//            if(null != result && result.size() > ZERO) {
-//                log.info("数据库连接【{}】测试OK", config.getDatasourceUrl());
-//                return SysHealth.builder().result(true).build();
-//            }
-//            else {
-//                log.error("数据库连接【{}】测试Fail", config.getDatasourceUrl());
-//                return SysHealth.builder().result(false).message("validation-query返回错误").build();
-//            }
-//        }
-//        catch (Exception e){
-//            Exceptions.printException(e);
-//            return SysHealth.builder().result(false).message(e.getMessage()).build();
-//        }
-        return SysHealth.builder().result(true).build();
+        try {
+            List result = jdbcTemplate.queryForList(validationQuery);
+            if(null != result && result.size() > ZERO) {
+                for (Map.Entry<String, Object> m : datasourcePropertyMapUrl.entrySet()) {
+                    log.info("数据库【{}】连接测试成功！",  m.getValue());
+                }
+                return SysHealth.builder().result(true).build();
+            }
+            else {
+                for (Map.Entry<String, Object> m : datasourcePropertyMapUrl.entrySet()) {
+                    log.error("数据库【{}】连接测试失败！",  m.getValue());
+                }
+                return SysHealth.builder().result(false).message("validation-query返回错误").build();
+            }
+        }
+        catch (Exception e){
+            Exceptions.printException(e);
+            return SysHealth.builder().result(false).message(e.getMessage()).build();
+        }
     }
 
     @Override

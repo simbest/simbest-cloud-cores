@@ -3,7 +3,6 @@
  */
 package com.simbest.cloud.cores.security.auth.service.impl;
 
-
 import com.simbest.cloud.cores.constants.ApplicationConstants;
 import com.simbest.cloud.cores.security.auth.service.IAuthUserCacheService;
 import com.simbest.cloud.cores.utils.redis.RedisUtil;
@@ -27,7 +26,6 @@ import java.util.concurrent.TimeUnit;
  * 作者: lishuyi
  * 时间: 2019/10/14  15:32
  */
-//libeixiao
 @Slf4j
 @Component
 public class AuthUserCacheServiceImpl implements IAuthUserCacheService {
@@ -69,26 +67,26 @@ public class AuthUserCacheServiceImpl implements IAuthUserCacheService {
             RedisUtil.setGlobal(getUserCacheKey(user.getUsername()), user.getId());
             log.debug("用户主键唯一标识【{}】已通过用户名键值【{}】完成缓存", user.getId(), getUserCacheKey(user.getUsername()));
         }
-//        if(StringUtils.isNotEmpty(user.getEmployeeNumber())) {
-//            RedisUtil.setGlobal(getUserCacheKey(user.getEmployeeNumber()), user.getId());
-//            log.debug("用户主键唯一标识【{}】已通过员工编号键值【{}】完成缓存", user.getId(), getUserCacheKey(user.getEmployeeNumber()));
-//        }
-//        if(StringUtils.isNotEmpty(user.getPreferredMobile())) {
-//            RedisUtil.setGlobal(getUserCacheKey(user.getPreferredMobile()), user.getId());
-//            log.debug("用户主键唯一标识【{}】已通过手机号码键值【{}】完成缓存", user.getId(), getUserCacheKey(user.getPreferredMobile()));
-//        }
-//        if(StringUtils.isNotEmpty(user.getEmail())) {
-//            RedisUtil.setGlobal(getUserCacheKey(user.getEmail()), user.getId());
-//            log.debug("用户主键唯一标识【{}】已通过邮箱键值【{}】完成缓存", user.getId(), getUserCacheKey(user.getEmail()));
-//        }
-//        if(StringUtils.isNotEmpty(user.getOpenid())) {
-//            RedisUtil.setGlobal(getUserCacheKey(user.getOpenid()), user.getId());
-//            log.debug("用户主键唯一标识【{}】已通过openid键值【{}】完成缓存", user.getId(), getUserCacheKey(user.getOpenid()));
-//        }
-//        if(StringUtils.isNotEmpty(user.getUnionid())) {
-//            RedisUtil.setGlobal(getUserCacheKey(user.getUnionid()), user.getId());
-//            log.debug("用户主键唯一标识【{}】已通过unionid键值【{}】完成缓存", user.getId(), getUserCacheKey(user.getUnionid()));
-//        }
+        if(StringUtils.isNotEmpty(user.getEmployeeNumber())) {
+            RedisUtil.setGlobal(getUserCacheKey(user.getEmployeeNumber()), user.getId());
+            log.debug("用户主键唯一标识【{}】已通过员工编号键值【{}】完成缓存", user.getId(), getUserCacheKey(user.getEmployeeNumber()));
+        }
+        if(StringUtils.isNotEmpty(user.getPreferredMobile())) {
+            RedisUtil.setGlobal(getUserCacheKey(user.getPreferredMobile()), user.getId());
+            log.debug("用户主键唯一标识【{}】已通过手机号码键值【{}】完成缓存", user.getId(), getUserCacheKey(user.getPreferredMobile()));
+        }
+        if(StringUtils.isNotEmpty(user.getEmail())) {
+            RedisUtil.setGlobal(getUserCacheKey(user.getEmail()), user.getId());
+            log.debug("用户主键唯一标识【{}】已通过邮箱键值【{}】完成缓存", user.getId(), getUserCacheKey(user.getEmail()));
+        }
+        if(StringUtils.isNotEmpty(user.getOpenid())) {
+            RedisUtil.setGlobal(getUserCacheKey(user.getOpenid()), user.getId());
+            log.debug("用户主键唯一标识【{}】已通过openid键值【{}】完成缓存", user.getId(), getUserCacheKey(user.getOpenid()));
+        }
+        if(StringUtils.isNotEmpty(user.getUnionid())) {
+            RedisUtil.setGlobal(getUserCacheKey(user.getUnionid()), user.getId());
+            log.debug("用户主键唯一标识【{}】已通过unionid键值【{}】完成缓存", user.getId(), getUserCacheKey(user.getUnionid()));
+        }
     }
 
     /**
@@ -133,26 +131,26 @@ public class AuthUserCacheServiceImpl implements IAuthUserCacheService {
             RedisUtil.expireGlobal(getUserCacheKey(user.getUsername()), 0, TimeUnit.NANOSECONDS);
             log.debug("已清理用户名键值【{}】的缓存", getUserCacheKey(user.getUsername()));
         }
-//        if(StringUtils.isNotEmpty(user.getEmployeeNumber())) {
-//            RedisUtil.expireGlobal(getUserCacheKey(user.getEmployeeNumber()), 0, TimeUnit.NANOSECONDS);
-//            log.debug("已清理员工编号键值【{}】的缓存", getUserCacheKey(user.getEmployeeNumber()));
-//        }
-//        if(StringUtils.isNotEmpty(user.getPreferredMobile())) {
-//            RedisUtil.expireGlobal(getUserCacheKey(user.getPreferredMobile()), 0, TimeUnit.NANOSECONDS);
-//            log.debug("已清理手机号码键值【{}】的缓存", getUserCacheKey(user.getPreferredMobile()));
-//        }
-//        if(StringUtils.isNotEmpty(user.getEmail())) {
-//            RedisUtil.expireGlobal(getUserCacheKey(user.getEmail()), 0, TimeUnit.NANOSECONDS);
-//            log.debug("已清理邮箱键值【{}】的缓存", getUserCacheKey(user.getEmail()));
-//        }
-//        if(StringUtils.isNotEmpty(user.getOpenid())) {
-//            RedisUtil.expireGlobal(getUserCacheKey(user.getOpenid()), 0, TimeUnit.NANOSECONDS);
-//            log.debug("已清理openid键值【{}】的缓存", getUserCacheKey(user.getOpenid()));
-//        }
-//        if(StringUtils.isNotEmpty(user.getUnionid())) {
-//            RedisUtil.expireGlobal(getUserCacheKey(user.getUnionid()), 0, TimeUnit.NANOSECONDS);
-//            log.debug("已清理unionid键值【{}】的缓存", getUserCacheKey(user.getUnionid()));
-//        }
+        if(StringUtils.isNotEmpty(user.getEmployeeNumber())) {
+            RedisUtil.expireGlobal(getUserCacheKey(user.getEmployeeNumber()), 0, TimeUnit.NANOSECONDS);
+            log.debug("已清理员工编号键值【{}】的缓存", getUserCacheKey(user.getEmployeeNumber()));
+        }
+        if(StringUtils.isNotEmpty(user.getPreferredMobile())) {
+            RedisUtil.expireGlobal(getUserCacheKey(user.getPreferredMobile()), 0, TimeUnit.NANOSECONDS);
+            log.debug("已清理手机号码键值【{}】的缓存", getUserCacheKey(user.getPreferredMobile()));
+        }
+        if(StringUtils.isNotEmpty(user.getEmail())) {
+            RedisUtil.expireGlobal(getUserCacheKey(user.getEmail()), 0, TimeUnit.NANOSECONDS);
+            log.debug("已清理邮箱键值【{}】的缓存", getUserCacheKey(user.getEmail()));
+        }
+        if(StringUtils.isNotEmpty(user.getOpenid())) {
+            RedisUtil.expireGlobal(getUserCacheKey(user.getOpenid()), 0, TimeUnit.NANOSECONDS);
+            log.debug("已清理openid键值【{}】的缓存", getUserCacheKey(user.getOpenid()));
+        }
+        if(StringUtils.isNotEmpty(user.getUnionid())) {
+            RedisUtil.expireGlobal(getUserCacheKey(user.getUnionid()), 0, TimeUnit.NANOSECONDS);
+            log.debug("已清理unionid键值【{}】的缓存", getUserCacheKey(user.getUnionid()));
+        }
     }
 
     /**
@@ -380,5 +378,6 @@ public class AuthUserCacheServiceImpl implements IAuthUserCacheService {
         //4、清理用户密码
         removeCacheUserPassword(username);
     }
+
 
 }

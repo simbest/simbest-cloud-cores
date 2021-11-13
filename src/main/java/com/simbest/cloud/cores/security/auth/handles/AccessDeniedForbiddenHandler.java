@@ -49,10 +49,9 @@ public class AccessDeniedForbiddenHandler implements AccessDeniedHandler, Authen
 
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException {
-        //登录发生错误计数，每错误一次，即向后再延时等待5分钟
         String username = request.getParameter(UsernamePasswordAuthenticationFilter.SPRING_SECURITY_FORM_USERNAME_KEY);
         if(StringUtils.isNotEmpty(username)){
-            log.warn("【{}】已认证失败", username);
+            log.warn("【{}】无权限访问【{}】", username, getRequestPath(request));
         }
         handleResponse(request, response, exception);
     }

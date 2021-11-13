@@ -3,7 +3,6 @@
  */
 package com.simbest.cloud.cores.utils.redis;
 
-import com.simbest.cloud.cores.constants.ApplicationConstants;
 import com.simbest.cloud.cores.constants.AuthoritiesConstants;
 import com.simbest.cloud.cores.constants.ErrorCodeConstants;
 import com.simbest.cloud.cores.exceptions.AttempMaxLoginFaildException;

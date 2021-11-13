@@ -3,6 +3,7 @@
  */
 package com.simbest.cloud.cores.security.auth.config;
 
+import com.simbest.cloud.cores.config.Swagger2CsrfProtection;
 import com.simbest.cloud.cores.constants.ApplicationConstants;
 import com.simbest.cloud.cores.security.auth.entrypoints.AccessDeniedEntryPoint;
 import com.simbest.cloud.cores.security.auth.filters.CaptchaAuthenticationFilter;
@@ -11,17 +12,24 @@ import com.simbest.cloud.cores.security.auth.filters.RestCaptchaAuthenticationFi
 import com.simbest.cloud.cores.security.auth.filters.RestRsaAuthenticationFilter;
 import com.simbest.cloud.cores.security.auth.filters.RestUumsAuthenticationFilter;
 import com.simbest.cloud.cores.security.auth.filters.RsaAuthenticationFilter;
+import com.simbest.cloud.cores.security.auth.filters.SsoAuthenticationRegister;
 import com.simbest.cloud.cores.security.auth.filters.UumsAuthenticationFilter;
 import com.simbest.cloud.cores.security.auth.handles.AccessDeniedForbiddenHandler;
+import com.simbest.cloud.cores.security.auth.handles.DefaultLogoutHandler;
+import com.simbest.cloud.cores.security.auth.handles.FailedLoginHandler;
+import com.simbest.cloud.cores.security.auth.handles.FailedLoginRedirectDefaultHandler;
 import com.simbest.cloud.cores.security.auth.handles.FailedLoginRedirectHandler;
 import com.simbest.cloud.cores.security.auth.handles.FailedLoginRestHandler;
+import com.simbest.cloud.cores.security.auth.handles.SuccessLoginHandler;
 import com.simbest.cloud.cores.security.auth.handles.SuccessLoginRedirectHandler;
 import com.simbest.cloud.cores.security.auth.handles.SuccessLoginRestHandler;
+import com.simbest.cloud.cores.security.auth.handles.SuccessLogoutHandler;
 import com.simbest.cloud.cores.security.auth.handles.SuccessLogoutRedirectHandler;
 import com.simbest.cloud.cores.security.auth.handles.SuccessLogoutRestHandler;
 import com.simbest.cloud.cores.security.auth.providers.GenericAuthenticationChecker;
 import com.simbest.cloud.cores.security.auth.service.IAuthUserCacheService;
 import com.simbest.cloud.cores.utils.encrypt.RsaEncryptor;
+import com.simbest.cloud.orguser.service.IAuthService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
@@ -38,6 +46,7 @@ import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.OrRequestMatcher;
 import org.springframework.session.FindByIndexNameSessionRepository;
@@ -46,20 +55,24 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.util.Map;
 
+import static com.simbest.cloud.cores.constants.ApplicationConstants.ERROR_PAGE;
 import static com.simbest.cloud.cores.constants.ApplicationConstants.LOGIN_ERROR_PAGE;
 import static com.simbest.cloud.cores.constants.ApplicationConstants.LOGIN_PAGE;
+import static com.simbest.cloud.cores.constants.ApplicationConstants.LOGOUT_PAGE;
 import static com.simbest.cloud.cores.constants.ApplicationConstants.REST_LOGIN_PAGE;
+import static com.simbest.cloud.cores.constants.ApplicationConstants.REST_LOGOUT_PAGE;
 import static com.simbest.cloud.cores.constants.ApplicationConstants.REST_UUMS_LOGIN_PAGE;
+import static com.simbest.cloud.cores.constants.ApplicationConstants.REST_UUMS_LOGOUT_PAGE;
+import static com.simbest.cloud.cores.constants.ApplicationConstants.ROOT_PAGE;
 import static com.simbest.cloud.cores.constants.ApplicationConstants.UUMS_LOGIN_PAGE;
+import static com.simbest.cloud.cores.constants.ApplicationConstants.WELCOME_PAGE;
 
 /**
  * 用途：认证中心服务器安全配置
  * 作者: lishuyi@simbest.com.cn
  * 时间: 2021/3/5  17:09
- *
+ * libeixiao
  */
-//libeixiao
-//@ConditionalOnProperty(name = "app.security.auth", havingValue = "server")
 @Slf4j
 @Configuration
 @EnableGlobalMethodSecurity(prePostEnabled = true)
@@ -69,38 +82,65 @@ public class FormSecurityConfigurer extends WebSecurityConfigurerAdapter {
     @Autowired
     private ApplicationContext appContext;
 
-    @Autowired
+    /**
+     * 页面重定向方式的处理器----START
+     */
+    @Autowired //成功登录
     private SuccessLoginRedirectHandler successLoginRedirectHandler;
 
-    @Autowired
-    private SuccessLoginRestHandler successLoginRestHandler;
-
-    @Autowired
-    private FailedLoginRedirectHandler failedLoginRedirectHandler;
-
-    @Autowired
-    private FailedLoginRestHandler FailedLoginRestHandler;
-
-    @Autowired
+    @Autowired //成功登出
     private SuccessLogoutRedirectHandler successLogoutRedirectHandler;
 
-    @Autowired
+    @Autowired //登录失败
+    private FailedLoginRedirectHandler failedLoginRedirectHandler;
+    /**
+     * 页面重定向方式的处理器----END
+     */
+
+    /**
+     * JSON数据返回方式的处理器----START
+     */
+    @Autowired //成功登录
+    private SuccessLoginRestHandler successLoginRestHandler;
+
+    @Autowired //成功登出
     private SuccessLogoutRestHandler successLogoutRestHandler;
 
-    @Autowired
+    @Autowired //登录失败
+    private FailedLoginRestHandler failedLoginRestHandler;
+
+    @Autowired //JSON通用401无权限禁止访问
     private AccessDeniedForbiddenHandler accessDeniedForbiddenHandler;
+    /**
+     * JSON数据返回方式的处理器----END
+     */
+
+//    @Autowired libeixiao
+//    private SsoSuccessLoginHandler ssoSuccessLoginHandler;
+
+    @Autowired
+    private DefaultLogoutHandler defaultLogoutHandler;
+
+    @Autowired
+    private Swagger2CsrfProtection swagger2CsrfProtection;
 
     @Autowired
     private RsaEncryptor rsaEncryptor;
+
+    @Autowired
+    private SsoAuthenticationRegister ssoAuthenticationRegister;
+
+    @Autowired
+    private FindByIndexNameSessionRepository sessionRepository;
+
+    @Autowired
+    private IAuthService authService;
 
     @Autowired
     private IAuthUserCacheService authUserCacheService;
 
     @Autowired
     private GenericAuthenticationChecker genericAuthenticationChecker;
-
-    @Autowired
-    private FindByIndexNameSessionRepository sessionRepository;
 
     @Bean
     public SpringSessionBackedSessionRegistry sessionRegistry() {
@@ -145,6 +185,11 @@ public class FormSecurityConfigurer extends WebSecurityConfigurerAdapter {
         );
     }
 
+    /**
+     * 配置通用表单安全验证器
+     * @param http
+     * @throws Exception
+     */
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
@@ -154,10 +199,11 @@ public class FormSecurityConfigurer extends WebSecurityConfigurerAdapter {
                 .addFilterBefore(restUumsAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .addFilterAt(rsaAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(restRsaAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
+//             libeixiao   .addFilterAfter(ssoAuthenticationFilter(), UumsAuthenticationFilter.class)
                 .authorizeRequests()
                 .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
                 .antMatchers(HttpMethod.OPTIONS).permitAll()//跨域请求会先进行一次options请求
-                .antMatchers(ApplicationConstants.ROOT_PAGE, ApplicationConstants.WELCOME_PAGE, ApplicationConstants.ERROR_PAGE, LOGIN_PAGE, ApplicationConstants.LOGOUT_PAGE).permitAll()  // 主页、欢迎页、错误页、登陆页、登出页可以匿名访问
+                .antMatchers(ROOT_PAGE, WELCOME_PAGE, ERROR_PAGE, LOGIN_PAGE, LOGOUT_PAGE).permitAll()  // 主页、欢迎页、错误页、登陆页、登出页可以匿名访问
                 .antMatchers("/h2-console/**", "/html/**").permitAll()  // 都可以访问
                 .antMatchers("/httpauth/**", "/**/anonymous/**", "/services/**", "/wx/**").permitAll()  // 都可以访问
                 .antMatchers("/action/**").hasRole("USER")   // 需要相应的角色才能访问
@@ -184,45 +230,7 @@ public class FormSecurityConfigurer extends WebSecurityConfigurerAdapter {
             log.debug("系统将注册定义过滤器【{}】", filter.getClass());
             http.addFilterAfter(filter, UumsAuthenticationFilter.class);
         }
-
     }
-
-    /**
-     * 验证码
-     * @return CaptchaAuthenticationFilter
-     * @throws Exception
-     */
-    @Bean
-    public CaptchaAuthenticationFilter captchaAuthenticationFilter() throws Exception {
-        CaptchaAuthenticationFilter filter = new CaptchaAuthenticationFilter(
-                new OrRequestMatcher(
-//                        new AntPathRequestMatcher("/*login", RequestMethod.POST.name())
-                        new AntPathRequestMatcher(UUMS_LOGIN_PAGE, RequestMethod.POST.name()),
-                        new AntPathRequestMatcher(LOGIN_PAGE, RequestMethod.POST.name())
-                ));
-        filter.setAuthenticationManager(authenticationManagerBean());
-        //跳至登陆页，提醒验证码错误
-        filter.setAuthenticationFailureHandler(new SimpleUrlAuthenticationFailureHandler(LOGIN_ERROR_PAGE));
-        return filter;
-    }
-
-    /** 验证码
-     * @return RestCaptchaAuthenticationFilter
-     * @throws Exception
-     */
-    @Bean
-    public RestCaptchaAuthenticationFilter restCaptchaAuthenticationFilter() throws Exception {
-        RestCaptchaAuthenticationFilter filter = new RestCaptchaAuthenticationFilter(
-                new OrRequestMatcher(
-                        new AntPathRequestMatcher(REST_UUMS_LOGIN_PAGE, RequestMethod.POST.name()),
-                        new AntPathRequestMatcher(REST_LOGIN_PAGE, RequestMethod.POST.name()),
-                        new AntPathRequestMatcher("/oauth/token", RequestMethod.POST.name())
-                ));
-        filter.setAuthenticationManager(authenticationManagerBean());
-        filter.setAuthenticationFailureHandler(accessDeniedForbiddenHandler);
-        return filter;
-    }
-
 
     /**
      * 基于数据库的主数据登录认证拦截器，拦截/login请求
@@ -258,12 +266,13 @@ public class FormSecurityConfigurer extends WebSecurityConfigurerAdapter {
         //记录成功登录日志
         filter.setAuthenticationSuccessHandler(successLoginRestHandler);
         //记录失败登录次数
-        filter.setAuthenticationFailureHandler(FailedLoginRestHandler);
+        filter.setAuthenticationFailureHandler(failedLoginRestHandler);
         filter.setEncryptor(rsaEncryptor);
         filter.setAuthUserCacheService(authUserCacheService);
         filter.setGenericAuthenticationChecker(genericAuthenticationChecker);
         return filter;
     }
+
     /**
      * 通过UUMS认证的应用认证拦截器，拦截/uumslogin请求（WEB方式）
      * @return UumsAuthenticationFilter
@@ -292,64 +301,80 @@ public class FormSecurityConfigurer extends WebSecurityConfigurerAdapter {
         //记录成功登录日志
         filter.setAuthenticationSuccessHandler(successLoginRestHandler);
         //记录失败登录次数
-        filter.setAuthenticationFailureHandler(FailedLoginRestHandler);
+        filter.setAuthenticationFailureHandler(failedLoginRestHandler);
         return filter;
     }
 
-//    /**
-//     * 普通Web认证
-//     * @param http
-//     * @throws Exception
-//     */
-//    @Override
-//    protected void configure(HttpSecurity http) throws Exception {
-//        http
-//                .authorizeRequests()
-//                .antMatchers("/login/**","/oauth/**").permitAll()
-//                .anyRequest().authenticated()
-//                .and()
-//                .formLogin().permitAll()
-//                .and()
-//                .csrf().disable();
+    /**
+     * REST方式退出登录，拦截/restuumslogout请求
+     * @return LogoutFilter
+     */
+    @Bean
+    public LogoutFilter restUumsLogoutFilter() {
+        LogoutFilter filter = new LogoutFilter(successLogoutRestHandler, defaultLogoutHandler);
+//        filter.setLogoutRequestMatcher(new AntPathRequestMatcher(REST_UUMS_LOGOUT_PAGE, RequestMethod.POST.name()));
+        filter.setLogoutRequestMatcher( new OrRequestMatcher(
+                new AntPathRequestMatcher(REST_UUMS_LOGOUT_PAGE, RequestMethod.POST.name()),
+                new AntPathRequestMatcher(REST_LOGOUT_PAGE, RequestMethod.POST.name())
+        ));
+        return filter;
+    }
+
+
+    /**
+     * 通过SSO单点的认证拦截器，拦截url请求中包含/sso的请求
+     * @return SsoAuthenticationFilter
+     * @throws Exception libeixiao
+     */
+//    @Bean
+//    public SsoAuthenticationFilter ssoAuthenticationFilter() throws Exception {
+//        SsoAuthenticationFilter filter = new SsoAuthenticationFilter(new AntPathRequestMatcher("/**/sso/**"));
+//        filter.setAuthenticationManager(authenticationManagerBean());
+//        filter.setSsoAuthenticationRegister(ssoAuthenticationRegister);
+//        // 不跳回首页
+//        filter.setAuthenticationSuccessHandler(ssoSuccessLoginHandler);
+//        //跳至登陆页，但不作任何提醒
+//        //filter.setAuthenticationFailureHandler(new SimpleUrlAuthenticationFailureHandler(LOGIN_PAGE));
+//        //记录失败登录次数
+//        filter.setAuthenticationFailureHandler(accessDeniedForbiddenHandler);
+//        return filter;
 //    }
 
+    /**
+     * 验证码
+     * @return CaptchaAuthenticationFilter
+     * @throws Exception
+     */
+    @Bean
+    public CaptchaAuthenticationFilter captchaAuthenticationFilter() throws Exception {
+        CaptchaAuthenticationFilter filter = new CaptchaAuthenticationFilter(
+                new OrRequestMatcher(
+//                        new AntPathRequestMatcher("/*login", RequestMethod.POST.name())
+                        new AntPathRequestMatcher(UUMS_LOGIN_PAGE, RequestMethod.POST.name()),
+                        new AntPathRequestMatcher(LOGIN_PAGE, RequestMethod.POST.name())
+                ));
+        filter.setAuthenticationManager(authenticationManagerBean());
+        //跳至登陆页，提醒验证码错误
+        filter.setAuthenticationFailureHandler(new SimpleUrlAuthenticationFailureHandler(LOGIN_ERROR_PAGE));
+        return filter;
+    }
 
-//    /**
-//     * 配合EnableOAuth2Sso的Client认证-REST方式
-//     * @param http
-//     * @throws Exception
-//     */
-//    @Override
-//    protected void configure(HttpSecurity http) throws Exception {
-//        http
-//                .requestMatchers()
-//                .antMatchers("/login", "/logout", "/oauth/**")
-//                .and().authorizeRequests().anyRequest().authenticated()
-//                .and().formLogin().successHandler(new RestSuccessLoginHandler()).failureHandler(new FailedLoginRestDefaultHandler())
-//                .and().logout().logoutSuccessHandler(new SuccessLogoutRestDefaultHandler())
-//                .and().exceptionHandling().authenticationEntryPoint(new AccessDeniedEntryPoint())
-//                .accessDeniedHandler(new FailedAccessDeniedHandler())
-//                .and().headers().frameOptions().sameOrigin()
-//                .and().csrf().disable();
-//    }
-
-
-//    /**
-//     * 配合EnableOAuth2Sso的Client认证-重定向方式
-//     * @param http
-//     * @throws Exception
-//     */
-//    @Override
-//    protected void configure(HttpSecurity http) throws Exception {
-//        http.requestMatchers()
-//                .antMatchers("/login", "/oauth/**")
-//                .and()
-//                .authorizeRequests().anyRequest().authenticated()
-//                .and()
-//                .formLogin()
-//                .and()
-//                .csrf().disable();
-//    }
+    /** 验证码
+     * @return RestCaptchaAuthenticationFilter
+     * @throws Exception
+     */
+    @Bean
+    public RestCaptchaAuthenticationFilter restCaptchaAuthenticationFilter() throws Exception {
+        RestCaptchaAuthenticationFilter filter = new RestCaptchaAuthenticationFilter(
+                new OrRequestMatcher(
+                        new AntPathRequestMatcher(REST_UUMS_LOGIN_PAGE, RequestMethod.POST.name()),
+                        new AntPathRequestMatcher(REST_LOGIN_PAGE, RequestMethod.POST.name())
+                ));
+        filter.setAuthenticationManager(authenticationManagerBean());
+        //记录失败登录次数
+        filter.setAuthenticationFailureHandler(accessDeniedForbiddenHandler);
+        return filter;
+    }
 
     /**
      * 向外暴露Spring Security的AuthenticationManager

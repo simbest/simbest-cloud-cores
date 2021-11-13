@@ -67,7 +67,7 @@ public class AppConfig {
 
     @Value("${app.oa.portal.token:SIMBEST_SSO}")
     private String mochaPortalToken;
-    @Value("${logback.artifactId}")
+    @Value("${spring.application.name}")
     private String appcode;
     @Value("${server.port}")
     private String serverPort;
@@ -81,7 +81,7 @@ public class AppConfig {
     @Value("${app.uums.address}")
     private String uumsAddress;
     // 是否开启心跳检测功能
-    @Value("${app.heart.check.enable:false}")
+    @Value("${app.task.cron.heart.test.job.open:false}")
     private boolean isOpenHeartCheck;
     @Value("${app.record.web.log:true}")
     private boolean isRecordWebLog;
@@ -176,6 +176,8 @@ public class AppConfig {
     private String licenseKeyCon;
 
 
+    private SortedMap<String,Object> datasourcePropertyMap = new TreeMap<>();
+
     @PostConstruct
     public void init() {
         log.info("************************************应用配置START**************************************************");
@@ -202,7 +204,7 @@ public class AppConfig {
         log.info("------------------------------------多线程配置END--------------------------------------------------");
         log.info("");
         log.info("====================================数据库配置START==================================================");
-        SortedMap<String,Object> datasourcePropertyMap = new TreeMap<>();
+        //获取应用中的所有数据库URL、username、password的配置信息
         Map<String, Object> propertyMap = Maps.newHashMap();
         propertyMap.put("activeProfiles", env.getActiveProfiles());
         MutablePropertySources sources = ((AbstractEnvironment) env).getPropertySources();
