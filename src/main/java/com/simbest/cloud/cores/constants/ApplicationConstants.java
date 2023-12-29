@@ -6,17 +6,22 @@ package com.simbest.cloud.cores.constants;
 import java.util.concurrent.TimeUnit;
 
 /**
- * 用途：系统常量
- * 作者: lishuyi@simbest.com.cn 
- * 时间: 2021/2/26  10:41
+ * 用途：应用常量
+ * 作者: lishuyi
+ * 时间: 2018/2/27  17:45
  */
 public class ApplicationConstants {
-
     public static final String DEV = "dev";
     public static final String TEST = "test";
     public static final String UAT = "uat";
     public static final String PRD = "prd";
     public static final String OTHER = "other";
+
+    public static final int ZERO = 0;
+    public static final int ONE = 1;
+    public static final int FONE = -1;
+    public static final Boolean TRUE = true;
+    public static final Boolean FALSE = false;
 
     public static final String ISO8859 = "ISO8859-1";
     public static final String UTF_8 = "UTF-8";
@@ -26,7 +31,7 @@ public class ApplicationConstants {
     public static final String Linux = "Linux";
     public static final String Windows = "Windows";
 
-    public static final String PACKAGE_NAME = "com.simbest.cloud";
+    public static final String PACKAGE_NAME = "com.simbest.boot";
     public static final String ROOT_PAGE = "/";
     public static final String ROOT_SSO_PAGE = "/sso";
     public static final String WELCOME_PAGE = "/welcome"; //站点首页，不需要session
@@ -39,6 +44,8 @@ public class ApplicationConstants {
     public static final String UUMS_LOGIN_PAGE = "/uumslogin";
     public static final String REST_UUMS_LOGIN_PAGE = "/restuumslogin";
     public static final String REST_UUMS_LOGOUT_PAGE = "/restuumslogout";
+    public static final String GET_CAS_USER = "/getCasCurrentUser"; //匿名接口
+    public static final String REST_CAS_LOGIN_PAGE = "/restcaslogin"; //匿名接口
     public static final String CAS_LOGIN_PAGE = "/caslogin";
     public static final String CAS_LOGIN_SUCCESS_PAGE = "/caslogin/cas";
     public static final String CAS_LOGOUT_PAGE = "/caslogout";
@@ -47,10 +54,13 @@ public class ApplicationConstants {
     public static final String LOGIN_SESSION_CODE = "validateCode";
     public static final String LOGIN_VALIDATE_CODE = "verifyCode";
     public static final String ANY_PASSWORD = "_anypassword_";
+    //登录授权码的Redis缓存前缀
+    public final static String REFINE_ANY_PASSWORD = "appAuthCode:%s:%s";
+
     public static final int ANY_PASSWORDTIME = 3600;
 
-    public static final int PAGE_NUMBER = 0;
-    public static final int PAGE_SIZE = 100;
+    public static final int DEFAULT_PAGE = 0;
+    public static final int DEFAULT_SIZE = 100;
 
     public static final String FORMAT_DATE_TIME = "yyyy-MM-dd HH:mm:ss";
     public static final String FORMAT_DATE = "yyyy-MM-dd";
@@ -82,12 +92,13 @@ public class ApplicationConstants {
     public final static String SEPARATOR = System.getProperty("file.separator");
     public final static String SLASH = "/";
     public final static String VERTICAL = "|";
+    public final static String HASH = "#";
 
     public final static String REDIS_DEFAULT_CACHE_PREFIX = "runtime";
 
     public final static String RSA_PUBLIC_KEY_PATH = "certificate/rsa/rsa_public_key.pem";
     public final static String RSA_PRIVATE_KEY_PATH = "certificate/rsa/pkcs8_private_key.pem";
-
+    
     public final static String LICENSE_KEY_PATH = "simbestkey/simbest.pem";
 
     public final static int REDIS_LOCK_WAIT_TIMEOUT = 1;
@@ -102,7 +113,9 @@ public class ApplicationConstants {
     public static final String ADMINISTRATOR = "hadmin";
     public static final String UUMS_APPCODE = "uums";
 
-
+    public static final String MSG_SUCCESS = "操作成功";
+    public static final String MSG_ERRO = "操作失败";
+    public static final String MSG_FILE_CHECK = "fileOK";
 
     public static final String REST_TEMPLATE_PARM_FILE = "file";
 }

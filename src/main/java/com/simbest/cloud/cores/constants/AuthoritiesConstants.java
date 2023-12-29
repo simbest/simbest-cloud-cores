@@ -4,9 +4,9 @@
 package com.simbest.cloud.cores.constants;
 
 /**
- * 用途：认证鉴权常量
- * 作者: lishuyi@simbest.com.cn 
- * 时间: 2021/2/26  11:50
+ * 用途：定义权限相关常量
+ * 作者: lishuyi
+ * 时间: 2018/2/6  17:11
  */
 public class AuthoritiesConstants {
 
@@ -24,6 +24,14 @@ public class AuthoritiesConstants {
 
     public static final String PERMISSION = "permission";
 
+    public static final String PERMISSION_UPDATE = "PERMISSION_UPDATE";
+
+    public static final String PERMISSION_DELETE = "PERMISSION_DELETE";
+
+    public static final String PERMISSION_CREATOR = "creator";
+
+    public static final String PERMISSION_MODIFIER = "modifier";
+
     public static final String SSO_UUMS_USERNAME = "username";
 
     public static final String SSO_UUMS_PASSWORD = "password";
@@ -38,6 +46,11 @@ public class AuthoritiesConstants {
 
     public static final String SSO_API_UID = "uid";
 
+    public static final String SSO_AUTH_HADMIN = "hadmin";
+
+    public static final String USER_RESET_PASSWORD_TYPE = "USER_RESET_PASSWORD";
+    public static final String USER_RESET_PASSWORD_NAME = "默认密码";
+
     public static final int PASSWORD_SALT_LENGTH = 12;
 
     public static final int ATTEMPT_LOGIN_INIT_TIMES = 1;
@@ -45,7 +58,8 @@ public class AuthoritiesConstants {
     public static final int ATTEMPT_LOGIN_FAILED_WAIT_SECONDS = 60 * 5;
     public static final String LOGIN_FAILED_KEY = "LOGIN_FAILED:";
 
-
+    public static final String ACCESS_FORBIDDEN = "权限不足，禁止访问!";
+    public static final String BUSINESS_FORBIDDEN = "业务禁止访问!";
 
     public static final String UsernameNotFoundException = "账号或密码错误!";
     public static final String BadCredentialsException = "账号或密码错误";
@@ -54,9 +68,14 @@ public class AuthoritiesConstants {
     public static final String LockedException = "账号已锁定";
     public static final String CredentialsExpiredException = "账户密码已到期";
     public static final String InsufficientAuthenticationException = "账户密码或验证码错误";
-    public static final String AttempMaxLoginFaildException = "错误登录超过"+ATTEMPT_LOGIN_MAX_TIMES+"次，锁定"+ATTEMPT_LOGIN_FAILED_WAIT_SECONDS/60+"分钟";
+    public static final String AttempMaxLoginFaildException = "错误登录超过" + ATTEMPT_LOGIN_MAX_TIMES + "次，锁定" + ATTEMPT_LOGIN_FAILED_WAIT_SECONDS / 60 + "分钟";
     public static final String InternalAuthenticationServiceException = "权限认证错误";
 
     public static final String OAUTH2_UNKNOW_CLIENT = "错误的客户端：";
 
+    public static final String OAUTH2_SUB = "sub";
+    public static final String AUTH_HEADER = "Authorization";
+    public static final String AUTH_HEADER_PREFIX = "Bearer ";
+
+    public static final Integer AUTH_HEADER_PREFIX_LENGTH = 7;
 }
