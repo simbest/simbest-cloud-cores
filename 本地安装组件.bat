@@ -1,5 +1,5 @@
 @echo begin install..............................
-set JAVA_HOME=C:\Java\jdk-17.0.5
+set JAVA_HOME=C:\Java\graalvm-jdk-17.0.9+11.1
 call mvn clean install -Dmaven.test.skip=true
 @echo install finished..............................
 pause
