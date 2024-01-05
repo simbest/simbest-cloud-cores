@@ -62,6 +62,10 @@ public class CustomTokenAuthenticationFilter extends OncePerRequestFilter {
                     });
                     return;
                 }
+            }else {
+                failureHandler.onAuthenticationFailure(request, response, new AuthenticationException("请求登陆已过期，请重新登陆") {
+                });
+                return;
             }
         } catch (AuthenticationException ex) {
             // 认证失败处理
