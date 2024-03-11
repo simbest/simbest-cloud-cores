@@ -21,6 +21,8 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 
+import static com.simbest.cloud.cores.component.distributed.lock.DistributedRedisLock.REDISSON_REDIS_LOCK;
+
 
 /**
  * 用途：Redis客户端工具类
@@ -115,10 +117,10 @@ public class RedisUtil {
      *
      * @param pattern
      */
-//    public static Long mulDelete(String pattern) {
-//        Set<String> keys = cacheUtils.redisTemplate.keys(prefix + pattern + ApplicationConstants.STAR);
-//        return cacheUtils.redisTemplate.delete(keys);
-//    }
+    public static Long mulDelete(String pattern) {
+        Set<String> keys = cacheUtils.redisTemplate.keys(prefix + pattern + ApplicationConstants.STAR);
+        return cacheUtils.redisTemplate.delete(keys);
+    }
 
     /**
      * 模糊删除key(全局)
@@ -1319,14 +1321,14 @@ public class RedisUtil {
      * redisson_lock_queue:{cache:key:nzl:master_lock}
      * redisson_lock_key_prefix_cache:key:nzl:TaskName
      */
-//	public static Long cleanRedisLock(){
-//        String searchLockKey = REDISSON_REDIS_LOCK + ApplicationConstants.STAR + appcode + ApplicationConstants.STAR;
-//        log.debug("按照关键字查询当前应用的分布式锁【{}】", searchLockKey);
-//        Set<String> lockKeys = RedisUtil.getRedisTemplate().keys(searchLockKey);
-//        Long ret1 = RedisUtil.getRedisTemplate().delete(lockKeys);
-//        log.debug("计划删除锁键共计【{}】个，锁键分别是【{}】，共计成功【{}】个", lockKeys.size(), StringUtils.joinWith(ApplicationConstants.COMMA, lockKeys), ret1);
-//        return ret1;
-//    }
+    public static Long cleanRedisLock(){
+        String searchLockKey = REDISSON_REDIS_LOCK + ApplicationConstants.STAR + appcode + ApplicationConstants.STAR;
+        log.debug("按照关键字查询当前应用的分布式锁【{}】", searchLockKey);
+        Set<String> lockKeys = RedisUtil.getRedisTemplate().keys(searchLockKey);
+        Long ret1 = RedisUtil.getRedisTemplate().delete(lockKeys);
+        log.debug("计划删除锁键共计【{}】个，锁键分别是【{}】，共计成功【{}】个", lockKeys.size(), StringUtils.joinWith(ApplicationConstants.COMMA, lockKeys), ret1);
+        return ret1;
+    }
 
     /**
      * 生成一个验证码，并设置缓存

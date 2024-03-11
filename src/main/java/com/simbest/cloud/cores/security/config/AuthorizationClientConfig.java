@@ -30,7 +30,8 @@ public class AuthorizationClientConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http)
             throws Exception {
         //uri放行
-        String[] ignoreUrls = new String[]{"/*.html", "/favicon.ico", "/webjars/**", "/*/v3/api-docs**", "/v3/api-docs/**","/oauth2/**"};
+        String[] ignoreUrls = new String[]{"/*.html", "/favicon.ico", "/webjars/**", "/*/v3/api-docs**", "/v3/api-docs/**","/oauth2/**","/swagger-resources/**",
+                "/swagger-ui/**"};
         http
                 .addFilterBefore(new CustomTokenAuthenticationFilter(), BasicAuthenticationFilter.class)
                 .authorizeHttpRequests(authorize ->

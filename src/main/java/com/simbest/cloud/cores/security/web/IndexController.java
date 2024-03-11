@@ -4,10 +4,10 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.json.JSONUtil;
 import com.simbest.boot.security.IUser;
 import com.simbest.boot.security.SimpleUser;
+import com.simbest.cloud.cores.base.web.response.JsonResponse;
 import com.simbest.cloud.cores.config.AppConfig;
 import com.simbest.cloud.feign.uums.clients.AuthClient;
 import com.simbest.cloud.feign.uums.model.vo.KeyInfoVo;
-import com.simbest.cloud.feign.uums.util.JsonResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
@@ -29,7 +29,7 @@ public class IndexController {
     private final AppConfig appConfig;
 
     @PostMapping("/getCurrentUser/api")
-    public JsonResponse getCurrentUser() {
+    public JsonResponse<SimpleUser> getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null) {
             if (authentication.getPrincipal() instanceof IUser) {

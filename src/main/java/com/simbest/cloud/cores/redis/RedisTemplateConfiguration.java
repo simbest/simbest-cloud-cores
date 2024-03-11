@@ -1,3 +1,4 @@
+/*
 package com.simbest.cloud.cores.redis;
 
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -17,10 +18,12 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 public class RedisTemplateConfiguration {
     @Bean
     public <T> RedisTemplate<String, T> redisObjectTemplate(RedisConnectionFactory factory) {
-        /**
+        */
+/**
          * 解决分离项目报空指针问题
          * 参考：https://www.jianshu.com/p/32d38a7fd20a
-         */
+         *//*
+
         ClassLoader classLoader = this.getClass().getClassLoader();
         RedisTemplate<String, T> template = new RedisTemplate<>();
         template.setConnectionFactory(factory);
@@ -59,3 +62,4 @@ public class RedisTemplateConfiguration {
     }
 
 }
+*/

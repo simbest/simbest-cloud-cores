@@ -3,6 +3,7 @@
  */
 package com.simbest.cloud.cores.util.encrypt;
 
+
 import com.simbest.cloud.cores.constants.ApplicationConstants;
 import com.simbest.cloud.cores.util.BootAppFileReader;
 import jakarta.annotation.PostConstruct;
@@ -325,41 +326,5 @@ public class RsaEncryptor extends AbstractEncryptor {
         return new String(binaryData);
     }
 
-    public static void main(String[] args) throws Exception {
-//        RsaEncryptor rsaEncryptor = new RsaEncryptor();
-//        String public_key = rsaEncryptor.getKeyFromFile("certificate/rsa/rsa_public_key.pem");
-//        String private_key = rsaEncryptor.getKeyFromFile("certificate/rsa/pkcs8_private_key.pem");
-//        rsaEncryptor.loadPublicKey(public_key);
-//        rsaEncryptor.loadPrivateKey(private_key);
-//
-//        String source = "111.com";
-//        String code = rsaEncryptor.encrypt(source);
-//        System.out.println("###########################");
-//        System.out.println(code);
-//        System.out.println(rsaEncryptor.decryptCode(code));
-//
-//        //UEZzSlIxYzR6YXdZRjEzWG1CU0NqSFo3c0p6bDNtbEVIcEdxdFdtSm9FcUcwVzl1eU9XQ2lzSEZlVU1oQWJUYVo2RW9RSGdrVGcyNCtZVkxOTUQ2WjdMZTJ6UXlvNURubmVFalpVSHZKL2NEaW9jS2d1RWRZMlNCMEdvMG9UcU1zN2xPNmRDN1lpbE40VkNnWUEwUXdnTFRXckljbW0xa2QxWDAwdWFjUzdnPQ
-//        Base64Encryptor base64Encryptor = new Base64Encryptor();
-//        //String date = "9999-12-30";
-//        String date = "2020-07-31 08:00:00";
-//        System.out.println(date);
-//        String code1 = base64Encryptor.encrypt(rsaEncryptor.encrypt(date));
-//        System.out.println("code1=======" + code1);
-//        //String code2 = rsaEncryptor.decrypt(base64Encryptor.decrypt("UEZzSlIxYzR6YXdZRjEzWG1CU0NqSFo3c0p6bDNtbEVIcEdxdFdtSm9FcUcwVzl1eU9XQ2lzSEZlVU1oQWJUYVo2RW9RSGdrVGcyNCtZVkxOTUQ2WjdMZTJ6UXlvNURubmVFalpVSHZKL2NEaW9jS2d1RWRZMlNCMEdvMG9UcU1zN2xPNmRDN1lpbE40VkNnWUEwUXdnTFRXckljbW0xa2QxWDAwdWFjUzdnPQ"));
-//        String code2 = rsaEncryptor.decrypt("gkjXKBLs7tfRTZVda4j1eprBSYL2ZtQUBsHmkj/exeU/MOE9+QjUGOGScB+/WgpXv9ikQFc7pDLAQkLroxEVxHhqqgFiwxuJNij34NE9/oZmaMD2SRIV90tKSPg2JW/9rOA1IAf+DDNS6+MYBopywkSqUx5w6DiCczjPF9DMnwY=");
-//        //String code2 = rsaEncryptor.decrypt(base64Encryptor.decrypt(code1));
-//        System.out.println("code2=======" + code2);
-//
-//        FileUtils fileUtils = new FileUtils();
-//        fileUtils.writeContentToFile("d:/simbest.pem",code1);
-//
-//        String str1 = rsaEncryptor.decrypt("OhVGsEnaYzgf6YffbjmAsxymNVdub+VB88DCc03n+w7sDkwG87fzZHpg38F1qmgWRHHUmYnZ6Fr2\n" +
-//                "vIjQW0tC6aTd88zPdUAfSwqIxpqCW1Tg8f0f4Xh5zkd89c6PRQq6j4PFLhmUsW4BkWCEqOWidtve\n" +
-//                "NpFnM3JZycP9wbl3h6s=\n");
-//
-//        String str2 = rsaEncryptor.decrypt("OhVGsEnaYzgf6YffbjmAsxymNVdub+VB88DCc03n+w7sDkwG87fzZHpg38F1qmgWRHHUmYnZ6Fr2 vIjQW0tC6aTd88zPdUAfSwqIxpqCW1Tg8f0f4Xh5zkd89c6PRQq6j4PFLhmUsW4BkWCEqOWidtve NpFnM3JZycP9wbl3h6s=");
-//
-//        String str3 = rsaEncryptor.decrypt("OhVGsEnaYzgf6YffbjmAsxymNVdub VB88DCc03n w7sDkwG87fzZHpg38F1qmgWRHHUmYnZ6Fr2 vIjQW0tC6aTd88zPdUAfSwqIxpqCW1Tg8f0f4Xh5zkd89c6PRQq6j4PFLhmUsW4BkWCEqOWidtve NpFnM3JZycP9wbl3h6s=");
-    }
 
 }

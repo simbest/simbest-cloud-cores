@@ -9,6 +9,6 @@ import org.springframework.context.annotation.Configuration;
  * @date: 2023/8/18
  */
 @Configuration
-@ComponentScan(basePackages = {"com.simbest.cloud.cores"})
+@ComponentScan(basePackages = {"com.simbest.cloud"})
 public class CoreAutoConfiguration {
 }
