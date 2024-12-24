@@ -3,11 +3,12 @@ package com.simbest.cloud.cores.util;
 import cn.hutool.core.bean.BeanUtil;
 import com.simbest.boot.security.IUser;
 import com.simbest.boot.security.SimpleUser;
-import com.simbest.cloud.cores.base.web.response.JsonResponse;
+import com.simbest.cloud.cores.common.web.response.JsonResponse;
 import com.simbest.cloud.cores.config.AppConfig;
 import com.simbest.cloud.cores.security.service.IAuthUserCacheService;
 import com.simbest.cloud.feign.uums.clients.AuthClient;
 import com.simbest.cloud.feign.uums.model.vo.KeyInfoVo;
+
 
 public class LoadUserUtils {
     public static IUser loadUser(String username) {

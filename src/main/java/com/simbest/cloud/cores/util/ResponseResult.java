@@ -24,7 +24,7 @@ public class ResponseResult {
         response.getWriter().print(jsonStr);
     }
 
-  /*  public static void exceptionResponse(HttpServletResponse response, String exceptionMessage) throws IOException {
+    public static void exceptionResponse(HttpServletResponse response, String exceptionMessage) throws IOException {
 
         JsonResponse jsonResponse = JsonResponse.unauthorized(exceptionMessage);
         String jsonStr = JSONUtil.toJsonStr(jsonResponse);
@@ -32,6 +32,6 @@ public class ResponseResult {
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setCharacterEncoding(Charsets.UTF_8.name());
         response.getWriter().print(jsonStr);
-    }*/
+    }
 
 }

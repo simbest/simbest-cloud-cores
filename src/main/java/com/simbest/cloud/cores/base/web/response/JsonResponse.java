@@ -169,6 +169,17 @@ public class JsonResponse<T>{
         return response;
     }
 
+    public static JsonResponse unauthorized(String exception) {
+        JsonResponse response = JsonResponse.builder().
+                errcode(HttpStatus.UNAUTHORIZED.value())
+                .status(HttpStatus.UNAUTHORIZED.value())
+                .error(exception)
+                .message(ACCESS_FORBIDDEN)
+                .timestamp(new Date())
+                .build();
+        log.warn("无权限访问，即将返回【{}】", JacksonUtils.obj2json(response));
+        return response;
+    }
     public static JsonResponse unauthorized(HttpServletRequest request, Exception exception) {
         JsonResponse response = JsonResponse.builder().
                 errcode(HttpStatus.UNAUTHORIZED.value())

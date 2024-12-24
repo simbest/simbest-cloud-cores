@@ -579,19 +579,4 @@ public class SysFileController extends LogicController<SysFile, String> {
 
 
 
-    public static void main(String[] args) throws Exception {
-        WebOffice3Des webOffice3Des = new WebOffice3Des();
-        AppConfig config = new AppConfig();
-        config.setAppHostPort("http://211.138.31.210:8088");
-        SysFileController sysFileController = new SysFileController(null);
-        sysFileController.setConfig(config);
-        String url = "http://10.87.13.91:8888/20200525/DemoExcel.xlsx";
-        System.out.println(sysFileController.getOfficeweb365Url(url));
-        url = "http://10.87.13.91:8888/20200525/DemoPdf.pdf";
-        System.out.println(sysFileController.getOfficeweb365Url(url));
-        url = "http://10.87.13.91:8888/20200525/DemoPpt.pptx";
-        System.out.println(sysFileController.getOfficeweb365Url(url));
-        url = "http://10.87.13.91:8888/20200525/DemoWord.doc";
-        System.out.println(sysFileController.getOfficeweb365Url(url));
-    }
 }

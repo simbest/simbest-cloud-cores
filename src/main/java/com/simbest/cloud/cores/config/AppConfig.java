@@ -8,7 +8,7 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
@@ -49,7 +49,7 @@ import static com.simbest.cloud.cores.constants.ApplicationConstants.SLASH;
  */
 @Slf4j
 @Data
-@Configuration
+@Component
 @RefreshScope
 public class AppConfig {
 
