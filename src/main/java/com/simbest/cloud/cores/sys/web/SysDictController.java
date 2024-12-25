@@ -5,7 +5,7 @@ package com.simbest.cloud.cores.sys.web;
 
 
 import com.simbest.cloud.cores.base.web.controller.LogicController;
-import com.simbest.cloud.cores.base.web.response.JsonResponse;
+import com.simbest.cloud.cores.common.web.response.JsonResponse;
 import com.simbest.cloud.cores.exception.GlobalExceptionRegister;
 import com.simbest.cloud.cores.sys.model.SysDict;
 import com.simbest.cloud.cores.sys.service.ISysDictService;
@@ -20,7 +20,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Arrays;
 import java.util.List;
 
-import static com.simbest.cloud.cores.base.web.response.JsonResponse.SUCCESS_CODE;
+
+import static com.simbest.cloud.cores.common.web.response.JsonResponse.SUCCESS_CODE;
 import static com.simbest.cloud.cores.constants.ApplicationConstants.MSG_SUCCESS;
 
 

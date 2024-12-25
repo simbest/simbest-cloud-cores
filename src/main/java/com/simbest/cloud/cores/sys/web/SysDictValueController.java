@@ -4,7 +4,7 @@
 package com.simbest.cloud.cores.sys.web;
 
 import com.simbest.cloud.cores.base.web.controller.LogicController;
-import com.simbest.cloud.cores.base.web.response.JsonResponse;
+import com.simbest.cloud.cores.common.web.response.JsonResponse;
 import com.simbest.cloud.cores.exception.GlobalExceptionRegister;
 import com.simbest.cloud.cores.sys.model.SysDictValue;
 import com.simbest.cloud.cores.sys.service.ISysDictService;

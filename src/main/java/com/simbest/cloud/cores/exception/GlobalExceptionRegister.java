@@ -3,7 +3,7 @@ package com.simbest.cloud.cores.exception;
 
 import com.alibaba.nacos.shaded.com.google.common.collect.Maps;
 import com.github.stuxuhai.jpinyin.ChineseHelper;
-import com.simbest.cloud.cores.base.web.response.JsonResponse;
+import com.simbest.cloud.cores.common.web.response.JsonResponse;
 import com.simbest.cloud.cores.constants.ErrorCodeConstants;
 import com.simbest.cloud.cores.exceptions.InsertExistObjectException;
 import com.simbest.cloud.cores.exceptions.UpdateNotExistObjectException;

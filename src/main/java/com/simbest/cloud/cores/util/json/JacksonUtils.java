@@ -3,7 +3,7 @@ package com.simbest.cloud.cores.util.json;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.simbest.cloud.cores.config.JacksonConfiguration;
+import com.simbest.cloud.cores.common.config.json.JacksonConfiguration;
 import com.simbest.cloud.cores.exception.Exceptions;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;

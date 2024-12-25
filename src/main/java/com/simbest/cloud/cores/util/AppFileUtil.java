@@ -8,11 +8,11 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.BooleanUtil;
 import cn.hutool.core.util.StrUtil;
 import com.simbest.cloud.cores.base.enums.StoreLocation;
+import com.simbest.cloud.cores.common.utils.encrypt.UrlEncryptor;
 import com.simbest.cloud.cores.config.AppConfig;
 import com.simbest.cloud.cores.constants.ApplicationConstants;
 import com.simbest.cloud.cores.exception.Exceptions;
 import com.simbest.cloud.cores.sys.model.SysFile;
-import com.simbest.cloud.cores.util.encrypt.UrlEncryptor;
 import com.simbest.cloud.cores.util.json.JacksonUtils;
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
@@ -56,10 +56,11 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.simbest.cloud.cores.common.utils.encrypt.AbstractEncryptor.DEFAULT_URL_ENCODING;
 import static com.simbest.cloud.cores.constants.ApplicationConstants.DOT;
 import static com.simbest.cloud.cores.constants.ApplicationConstants.SLASH;
 import static com.simbest.cloud.cores.sys.web.SysFileController.*;
-import static com.simbest.cloud.cores.util.encrypt.AbstractEncryptor.DEFAULT_URL_ENCODING;
+
 
 
 

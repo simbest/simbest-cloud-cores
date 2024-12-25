@@ -8,7 +8,7 @@ import com.alibaba.nacos.shaded.com.google.common.collect.Maps;
 import com.simbest.cloud.cores.base.enums.SysCustomFieldType;
 import com.simbest.cloud.cores.base.repository.Condition;
 import com.simbest.cloud.cores.base.web.controller.LogicController;
-import com.simbest.cloud.cores.base.web.response.JsonResponse;
+import com.simbest.cloud.cores.common.web.response.JsonResponse;
 import com.simbest.cloud.cores.sys.model.SysCustomField;
 import com.simbest.cloud.cores.sys.model.SysCustomFieldValue;
 import com.simbest.cloud.cores.sys.repository.SysCustomFieldRepository;

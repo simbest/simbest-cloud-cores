@@ -1,3 +1,4 @@
+/*
 package com.simbest.cloud.cores.config;
 
 import com.fasterxml.jackson.core.json.JsonReadFeature;
@@ -25,6 +26,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 
+*/
 /**
  * <strong>Title</strong> : JacksonConfiguration.java<br>
  * <strong>Description</strong> : <br>
@@ -35,15 +37,22 @@ import java.time.format.DateTimeFormatter;
  * @author baimengqi baimengqi@simbest.com.cn
  * @author lishuyi baimengqi@simbest.com.cn
  * @version v0.0.1
- */
+ *//*
+
 @Configuration
 public class JacksonConfiguration {
 
-    /** 默认日期时间格式 */
+    */
+/** 默认日期时间格式 *//*
+
     public static final String DEFAULT_DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
-    /** 默认日期格式 */
+    */
+/** 默认日期格式 *//*
+
     public static final String DEFAULT_DATE_FORMAT = "yyyy-MM-dd";
-    /** 默认时间格式 */
+    */
+/** 默认时间格式 *//*
+
     public static final String DEFAULT_TIME_FORMAT = "HH:mm:ss";
 
     @Bean
@@ -65,10 +74,12 @@ public class JacksonConfiguration {
         //Bigdecimal、Double以json格式返回前端不丢失小数点,序列换成json时,将所有的long变成string 因为js中的数字类型不能包含所有的java long值
         SimpleModule simpleModule = new SimpleModule();
         //simpleModule.addSerializer(Double.class, ToStringSerializer.instance);
-        /*simpleModule.addSerializer(BigDecimal.class, ToStringSerializer.instance);
+        */
+/*simpleModule.addSerializer(BigDecimal.class, ToStringSerializer.instance);
         simpleModule.addSerializer(Long.class, ToStringSerializer.instance);
         simpleModule.addDeserializer(Integer.class, new NumberDeserializers.IntegerDeserializer(Integer.class,0));
-        simpleModule.addSerializer(Integer.class,NumberSerializer.instance);*/
+        simpleModule.addSerializer(Integer.class,NumberSerializer.instance);*//*
+
 
         ObjectMapper mapper = new ObjectMapper().registerModule(new ParameterNamesModule()).registerModule(new
                 Jdk8Module()).registerModule(simpleModule).registerModule(javaTimeModule).registerModule(simbestModule);
@@ -108,4 +119,4 @@ public class JacksonConfiguration {
         return mapper;
     }
 
-}
+}*/

@@ -1,7 +1,7 @@
 package com.simbest.cloud.cores.util;
 
 import cn.hutool.json.JSONUtil;
-import com.simbest.cloud.cores.base.web.response.JsonResponse;
+import com.simbest.cloud.cores.common.web.response.JsonResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.codec.Charsets;

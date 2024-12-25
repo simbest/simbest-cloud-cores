@@ -4,7 +4,7 @@ package com.simbest.cloud.cores.base.web.controller;
 import com.simbest.cloud.cores.base.model.GenericModel;
 import com.simbest.cloud.cores.base.repository.Condition;
 import com.simbest.cloud.cores.base.service.IGenericService;
-import com.simbest.cloud.cores.base.web.response.JsonResponse;
+import com.simbest.cloud.cores.common.web.response.JsonResponse;
 import com.simbest.cloud.cores.exception.GlobalExceptionRegister;
 import com.simbest.cloud.cores.util.CustomBeanUtil;
 import com.simbest.cloud.cores.util.ObjectUtil;

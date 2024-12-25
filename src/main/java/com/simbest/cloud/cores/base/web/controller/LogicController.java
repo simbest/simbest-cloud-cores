@@ -3,7 +3,7 @@ package com.simbest.cloud.cores.base.web.controller;
 
 import com.simbest.cloud.cores.base.model.LogicModel;
 import com.simbest.cloud.cores.base.service.ILogicService;
-import com.simbest.cloud.cores.base.web.response.JsonResponse;
+import com.simbest.cloud.cores.common.web.response.JsonResponse;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
