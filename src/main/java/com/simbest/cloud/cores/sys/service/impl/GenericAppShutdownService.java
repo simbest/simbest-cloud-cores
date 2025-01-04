@@ -9,7 +9,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import static com.simbest.cloud.cores.component.GracefulShutdown.SHUTDOWN_FLAG;
 
-
 /**
  * 用途：完美关闭应用的钩子
  * 作者: lishuyi

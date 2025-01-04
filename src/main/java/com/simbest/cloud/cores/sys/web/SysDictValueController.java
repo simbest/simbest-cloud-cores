@@ -4,15 +4,12 @@
 package com.simbest.cloud.cores.sys.web;
 
 import com.simbest.cloud.cores.base.web.controller.LogicController;
-import com.simbest.cloud.cores.common.web.response.JsonResponse;
 import com.simbest.cloud.cores.exception.GlobalExceptionRegister;
+import com.simbest.cloud.cores.response.JsonResponse;
 import com.simbest.cloud.cores.sys.model.SysDictValue;
 import com.simbest.cloud.cores.sys.service.ISysDictService;
 import com.simbest.cloud.cores.sys.service.ISysDictValueService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.Parameters;
-import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -20,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Arrays;
 
 import static com.simbest.cloud.cores.constants.ApplicationConstants.MSG_SUCCESS;
-
 
 /**
  * 用途：数据字典值控制器
@@ -30,7 +26,7 @@ import static com.simbest.cloud.cores.constants.ApplicationConstants.MSG_SUCCESS
 @Tag(name = "SysDictValueController", description = "系统管理-数据字典值管理")
 @RestController
 @RequestMapping("/sys/dictValue")
-public class SysDictValueController extends LogicController<SysDictValue,String> {
+public class SysDictValueController extends LogicController<SysDictValue,String>{
 
     private ISysDictValueService sysDictValueService;
 
@@ -84,7 +80,6 @@ public class SysDictValueController extends LogicController<SysDictValue,String>
      */
     //@PreAuthorize("hasAnyAuthority('ROLE_SUPER','ROLE_ADMIN')")
     @Operation(summary = "根据id删除字典值", description = "根据id删除字典值")
-    @Parameter(name = "id", description = "字典值ID",   in = ParameterIn.QUERY)
     public JsonResponse deleteById(@RequestParam(required = false) String id) {
         try {
             sysDictValueService.deleteById(id);
@@ -132,9 +127,6 @@ public class SysDictValueController extends LogicController<SysDictValue,String>
      * @return JsonResponse
      */
     @Operation(summary = "修改可见", description = "修改可见")
-    @Parameters({@Parameter(name = "id", description = "字典值ID", required = true,  in = ParameterIn.QUERY),
-            @Parameter(name = "enabled", description = "是否可用", required = true,  in = ParameterIn.QUERY)
-    })
     @Override
     public JsonResponse updateEnable(@RequestParam(required = false) String id, @RequestParam(required = false) boolean enabled) {
         try {
@@ -153,7 +145,6 @@ public class SysDictValueController extends LogicController<SysDictValue,String>
      * @return JsonResponse
      */
     @Operation(summary = "根据id查询字典值", description = "根据id查询字典值")
-    @Parameter(name = "id", description = "字典类型ID",  in = ParameterIn.QUERY)
     @PostMapping(value = {"/findById","/findById/sso","/findById/api"})
     public JsonResponse findById(@RequestParam(required = false) String id) {
         return super.findById( id );
@@ -169,16 +160,6 @@ public class SysDictValueController extends LogicController<SysDictValue,String>
      * @return JsonResponse
      */
     @Operation(summary = "获取字典值信息列表并分页", description = "获取字典值信息列表并分页")
-    @Parameters({ //
-            @Parameter(name = "page", description = "当前页码",  in = ParameterIn.QUERY, //
-                    required = true, example = "1"), //
-            @Parameter(name = "size", description = "每页数量",  in = ParameterIn.QUERY, //
-                    required = true, example = "10"), //
-            @Parameter(name = "direction", description = "排序规则（asc/desc）",  //
-                    in = ParameterIn.QUERY), //
-            @Parameter(name = "properties", description = "排序规则（属性名称）",  //
-                    in = ParameterIn.QUERY) //
-    })
     @PostMapping(value = {"/findAll","/findAll/sso","/findAll/api"})
     public JsonResponse findAll( @RequestParam(required = false, defaultValue = "1") int page, //
                                  @RequestParam(required = false, defaultValue = "10") int size, //
@@ -212,7 +193,7 @@ public class SysDictValueController extends LogicController<SysDictValue,String>
      * @param sysDictValue
      * @return JsonResponse
      */
-    @Operation (summary = "根据字典值对象查询满足条件的数据字典值，若提供上级数据字典值id，则直接返回所有字典值")
+    @Operation(summary = "根据字典值对象查询满足条件的数据字典值，若提供上级数据字典值id，则直接返回所有字典值")
     @PostMapping(value = {"/findDictValue", "/findDictValue/sso", "/findDictValue/api", "/findDictValue/anonymous"})
     public JsonResponse findDictValue(@RequestBody(required = false) SysDictValue sysDictValue){
         return JsonResponse.success(sysDictValueService.findDictValue(sysDictValue));
@@ -224,11 +205,7 @@ public class SysDictValueController extends LogicController<SysDictValue,String>
      * @param name
      * @return JsonResponse
      */
-    @Operation (summary = "根据字典类型和字典值名称，获取字典值")
-    @Parameters({
-            @Parameter(name = "dictType", description = "字典类型",  in = ParameterIn.QUERY, required = true),
-            @Parameter(name = "name", description = "字典值名称",  in = ParameterIn.QUERY, required = true)
-    })
+    @Operation(summary = "根据字典类型和字典值名称，获取字典值")
     @PostMapping(value = {"/findByDictTypeAndName", "/findByDictTypeAndName/sso", "/findByDictTypeAndName/api"})
     public JsonResponse findByDictTypeAndName(@RequestParam String dictType, @RequestParam String name){
         return JsonResponse.success(sysDictValueService.findByDictTypeAndName(dictType, name));
@@ -242,13 +219,7 @@ public class SysDictValueController extends LogicController<SysDictValue,String>
      * @param corpid
      * @return JsonResponse
      */
-    @Operation (summary = "根据字典类型和字典值名称，以及集团Id、企业Id，获取字典值")
-    @Parameters({
-            @Parameter(name = "dictType", description = "字典类型",  in = ParameterIn.QUERY, required = true),
-            @Parameter(name = "name", description = "字典值名称",  in = ParameterIn.QUERY, required = true),
-            @Parameter(name = "blocid", description = "集团Id",  in = ParameterIn.QUERY, required = true),
-            @Parameter(name = "corpid", description = "企业Id",  in = ParameterIn.QUERY, required = true)
-    })
+    @Operation(summary = "根据字典类型和字典值名称，以及集团Id、企业Id，获取字典值")
     @PostMapping(value = {"/findByDictTypeAndNameAndBlocidAndCorpid", "/findByDictTypeAndNameAndBlocidAndCorpid/sso", "/findByDictTypeAndNameAndBlocidAndCorpid/api"})
     public JsonResponse findByDictTypeAndNameAndBlocidAndCorpid(@RequestParam String dictType, @RequestParam String name,
                                                                 @RequestParam String blocid, @RequestParam String corpid){
@@ -281,7 +252,7 @@ public class SysDictValueController extends LogicController<SysDictValue,String>
      */
     @Operation(summary = "查看指定数据字典类型的字典值, Map结构，key为dictType，value为字典值list")
     @PostMapping(value = {"/findDictValueMapList", "/findDictValueMapList/sso", "/findDictValueMapList/api"})
-    public JsonResponse findDictValueMapList(@Parameter(name = "typeList", description = "字典类型") @RequestBody String[] typeList){
+    public JsonResponse findDictValueMapList(@RequestBody String[] typeList){
         return JsonResponse.success(sysDictValueService.findDictValueMapList(typeList));
     }
 

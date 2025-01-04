@@ -48,14 +48,4 @@ public class ApplicationConfiguration {
     }
 
 
-    /**
-     * 配置缺省的无权限访问入口
-     * @return
-     */
-/*    @Bean
-    @ConditionalOnMissingBean(value = IAccessDeniedEntryPoint.class)
-    public IAccessDeniedEntryPoint accessDeniedEntryPoint() {
-        return new RestAccessDeniedEntryPoint();
-    }*/
-
 }

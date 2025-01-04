@@ -3,12 +3,11 @@
  */
 package com.simbest.cloud.cores.sys.web;
 
-
-import com.alibaba.nacos.shaded.com.google.common.collect.Maps;
-import com.simbest.cloud.cores.base.enums.SysCustomFieldType;
+import com.google.common.collect.Maps;
 import com.simbest.cloud.cores.base.repository.Condition;
 import com.simbest.cloud.cores.base.web.controller.LogicController;
-import com.simbest.cloud.cores.common.web.response.JsonResponse;
+import com.simbest.cloud.cores.enums.SysCustomFieldType;
+import com.simbest.cloud.cores.response.JsonResponse;
 import com.simbest.cloud.cores.sys.model.SysCustomField;
 import com.simbest.cloud.cores.sys.model.SysCustomFieldValue;
 import com.simbest.cloud.cores.sys.repository.SysCustomFieldRepository;
@@ -16,9 +15,6 @@ import com.simbest.cloud.cores.sys.service.ISysCustomFieldService;
 import com.simbest.cloud.cores.sys.service.ISysCustomFieldValueService;
 import com.simbest.cloud.cores.sys.service.ISysDictService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.Parameters;
-import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -129,13 +125,7 @@ public class SysCustomFieldController extends LogicController<SysCustomField, St
     }
 
     @Operation(summary = "获取自定义字段列表", description = "通过此接口来获取某实体类型自定义字段")
-    @Parameters({ //
-            @Parameter(name = "page", description = "当前页码", in = ParameterIn.QUERY, required = true, example = "1"), //
-            @Parameter(name = "size", description = "每页数量",  in = ParameterIn.QUERY, required = true, example = "10"), //
-            @Parameter(name = "fieldClassify", description = "所属实体分类",  in = ParameterIn.QUERY, required = true),
-            @Parameter(name = "fieldEntityId", description = "所属实体Id",  in = ParameterIn.QUERY, required = true)
-    })
-    @PostMapping(value = "getSysCustomFieldsByFieldClassify")
+       @PostMapping(value = "getSysCustomFieldsByFieldClassify")
     public JsonResponse getSysCustomFieldsByFieldClassify(@RequestParam(required = false, defaultValue = "1") int page, //
                                                           @RequestParam(required = false, defaultValue = "10") int size, //
                                                           @RequestParam String fieldClassify, //

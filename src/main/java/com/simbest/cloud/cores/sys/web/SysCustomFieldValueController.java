@@ -3,19 +3,16 @@
  */
 package com.simbest.cloud.cores.sys.web;
 
-
 import com.simbest.cloud.cores.base.repository.Condition;
 import com.simbest.cloud.cores.base.web.controller.LogicController;
-import com.simbest.cloud.cores.common.web.response.JsonResponse;
+import com.simbest.cloud.cores.response.JsonResponse;
 import com.simbest.cloud.cores.sys.model.SysCustomFieldValue;
 import com.simbest.cloud.cores.sys.model.SysCustomFieldValueDto;
 import com.simbest.cloud.cores.sys.service.ISysCustomFieldService;
 import com.simbest.cloud.cores.sys.service.ISysCustomFieldValueService;
 import com.simbest.cloud.cores.sys.service.ISysDictService;
-import com.simbest.cloud.cores.util.SecurityUtils;
+import com.simbest.cloud.cores.security.utils.SecurityUtils;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -97,9 +94,64 @@ public class SysCustomFieldValueController extends LogicController<SysCustomFiel
 
     @PreAuthorize("hasAnyAuthority('ROLE_SUPER','ROLE_ADMIN')")
     @Operation(summary = "根据id删除自定义字段值", description = "根据id删除自定义字段值")
-    @Parameter(name = "id", description = "自定义字段值ID", in = ParameterIn.QUERY)
     public JsonResponse deleteById(@RequestParam(required = false) String id) {
         return super.deleteById( id );
     }
-
+//
+//    @Operation(summary = "获取自定义字段列表", description = "通过此接口来获取某实体类型自定义字段")
+//    @ApiImplicitParams({ //
+//            @ApiImplicitParam(name = "page", value = "当前页码", dataType = "int", paramType = "query", //
+//                    required = true, example = "1"), //
+//            @ApiImplicitParam(name = "size", value = "每页数量", dataType = "int", paramType = "query", //
+//                    required = true, example = "10"), //
+//    })
+//    @PostMapping(value = "getSysCustomFieldsByFieldClassify")
+//    public JsonResponse getSysCustomFieldsByFieldClassify(@RequestParam(required = false, defaultValue = "1") int page, //
+//                                       @RequestParam(required = false, defaultValue = "10") int size, //
+//                                       @RequestParam(required = true) String fieldClassify, //
+//                                       @RequestParam(required = false, defaultValue = "-1") long fieldEntityId //
+//    ) {
+//        // 获取分页规则
+//        Pageable pageable = fieldRepository.getPageable(page, size, null, null);
+//
+//        // 获取查询条件
+//        Condition condition = new Condition();
+//        condition.eq("fieldClassify", fieldClassify);
+//
+//        Specification<SysCustomField> s = fieldRepository.getSpecification(condition);
+//
+//        // 获取查询结果
+//        Page<SysCustomField> pages = fieldRepository.findAll(s, pageable);
+//
+//        // 构成返回信息
+//        Map<String, Object> searchD = new HashMap<>();
+//        searchD.put("fieldClassify", fieldClassify);
+//        SysCustomField param = new SysCustomField();
+//        param.setFieldClassify(fieldClassify);
+//        searchD.put("fieldClassifyCn", param.getFieldClassifyCn());
+//
+//        Map<String, Object> map = new HashMap<>();
+//        map.put("totalSize", pages.getTotalElements());
+//        map.put("totalPage", pages.getTotalPages());
+//        map.put("list", pages.getContent());
+//        map.put("size", pages.getSize());
+//        map.put("page", page);
+//        map.put("searchD", searchD);
+//
+//        if (fieldEntityId != -1) {
+//            Condition condition1 = new Condition();
+//            condition1.eq("fieldClassify", fieldClassify);
+//            condition1.eq("fieldEntityId", fieldEntityId);
+//            Specification<SysCustomFieldValue> s1 = fieldValueService.getSpecification(condition1);
+//            List<SysCustomFieldValue> values = fieldValueService.findAll(s1);
+//            map.put("values", values);
+//        }
+//
+//        JsonResponse res = JsonResponse.builder() //
+//                .errcode(JsonResponse.SUCCESS_CODE) //
+//                .errmsg("查询成功！") //
+//                .data(map)
+//                .build();
+//        return res;
+//    }
 }

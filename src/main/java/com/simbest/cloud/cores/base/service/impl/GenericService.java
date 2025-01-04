@@ -8,8 +8,8 @@ import com.simbest.cloud.cores.base.service.IGenericService;
 import com.simbest.cloud.cores.constants.ApplicationConstants;
 import com.simbest.cloud.cores.exceptions.InsertExistObjectException;
 import com.simbest.cloud.cores.exceptions.UpdateNotExistObjectException;
-import com.simbest.cloud.cores.util.CustomBeanUtil;
-import com.simbest.cloud.cores.util.ObjectUtil;
+import com.simbest.cloud.cores.utils.CustomBeanUtil;
+import com.simbest.cloud.cores.utils.ObjectUtil;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.utils.Sets;
@@ -262,7 +262,7 @@ public class GenericService<T extends GenericModel,PK extends Serializable> impl
     @Override
     @Transactional
     public T update ( T source ) {
-        PK pk = (PK)ObjectUtil.getEntityIdVaue(source);
+        PK pk = (PK) ObjectUtil.getEntityIdVaue(source);
         if(null != pk) {
             log.debug("@Generic Repository Service update a already object: " + source);
             T target = findById(pk);

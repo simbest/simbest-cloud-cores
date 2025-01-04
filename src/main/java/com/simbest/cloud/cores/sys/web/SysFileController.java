@@ -3,34 +3,40 @@
  */
 package com.simbest.cloud.cores.sys.web;
 
+import com.gargoylesoftware.htmlunit.BrowserVersion;
+import com.gargoylesoftware.htmlunit.WebClient;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 
-import com.alibaba.nacos.shaded.com.google.common.collect.ImmutableList;
-import com.simbest.cloud.cores.base.enums.StoreLocation;
+import com.google.common.collect.Sets;
 import com.simbest.cloud.cores.base.web.controller.LogicController;
-import com.simbest.cloud.cores.common.web.response.JsonResponse;
-import com.simbest.cloud.cores.common.utils.encrypt.Md5Encryptor;
-import com.simbest.cloud.cores.common.utils.encrypt.UrlEncryptor;
-import com.simbest.cloud.cores.common.utils.encrypt.WebOffice3Des;
 import com.simbest.cloud.cores.config.AppConfig;
 import com.simbest.cloud.cores.constants.ApplicationConstants;
+import com.simbest.cloud.cores.enums.StoreLocation;
+import com.simbest.cloud.cores.json.JacksonUtils;
+import com.simbest.cloud.cores.response.JsonResponse;
 import com.simbest.cloud.cores.sys.model.SysFile;
 import com.simbest.cloud.cores.sys.model.UploadFileResponse;
 import com.simbest.cloud.cores.sys.service.ISysFileService;
-import com.simbest.cloud.cores.util.AppFileUtil;
-import com.simbest.cloud.cores.util.UrlEncoderUtils;
-import com.simbest.cloud.cores.util.http.BrowserUtil;
-import com.simbest.cloud.cores.util.json.JacksonUtils;
+import com.simbest.cloud.cores.utils.http.UrlEncoderUtils;
+import com.simbest.cloud.cores.utils.encrypt.Md5Encryptor;
+import com.simbest.cloud.cores.utils.encrypt.UrlEncryptor;
+import com.simbest.cloud.cores.utils.encrypt.WebOffice3Des;
+import com.simbest.cloud.cores.utils.files.AppFileUtil;
+import com.simbest.cloud.cores.utils.http.BrowserUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
+import java.util.Set;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.compress.utils.Lists;
-import org.apache.commons.compress.utils.Sets;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -39,7 +45,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
@@ -48,8 +53,7 @@ import java.net.URLEncoder;
 import java.util.*;
 import java.util.concurrent.Future;
 
-import static com.simbest.cloud.cores.util.AppFileUtil.NGINX_STATIC_FILE_LOCATION;
-import static org.apache.commons.lang3.StringUtils.EMPTY;
+import static com.simbest.cloud.cores.utils.files.AppFileUtil.NGINX_STATIC_FILE_LOCATION;
 
 
 /**
@@ -57,7 +61,7 @@ import static org.apache.commons.lang3.StringUtils.EMPTY;
  * 作者: lishuyi https://www.mkyong.com/spring-boot/spring-boot-file-upload-example-ajax-and-rest/
  * 时间: 2018/2/23  10:14
  */
-@Tag(name = "SysFileController", description = "系统管理-文件管理")
+@Tag(name  = "SysFileController", description = "系统管理-文件管理")
 @Slf4j
 @Controller
 @RequestMapping("/sys/file")
@@ -115,6 +119,41 @@ public class SysFileController extends LogicController<SysFile, String> {
         } else {
             jsonResponse = JsonResponse.defaultErrorResponse();
         }
+        return jsonResponse;
+    }
+
+    @PostMapping(value = {"/updateFile", "/updateFile/sso", "/updateFile/api"})
+    @ResponseBody
+    public JsonResponse updateFile(@RequestParam("file") MultipartFile file,
+                                   @RequestParam(value = "pmInsId", required = false) String pmInsId,
+                                   @RequestParam(value = "id") String id) {
+        SysFile sysFile = fileService.updateProcessFile(file, pmInsId, id);
+        JsonResponse jsonResponse;
+        if (null != sysFile) {
+            UploadFileResponse uploadFileResponse = new UploadFileResponse();
+            uploadFileResponse.setSysFiles(ImmutableList.of(sysFile));
+            jsonResponse = JsonResponse.success(uploadFileResponse);
+        } else {
+            jsonResponse = JsonResponse.defaultErrorResponse();
+        }
+        return jsonResponse;
+    }
+
+    @PostMapping(value = {"/getFilesByPmInsId", "/getFilesByPmInsId/sso", "/getFilesByPmInsId/api"})
+    @ResponseBody
+    public JsonResponse getFilesByPmInsId(@RequestParam(value = "pmInsId") String pmInsId,
+                                   @RequestParam(value = "appCode") String appCode) {
+        List<SysFile> sysFiles = fileService.getFilesByPmInsId( pmInsId);
+        JsonResponse jsonResponse = null != sysFiles ? JsonResponse.success(sysFiles) : JsonResponse.defaultErrorResponse();
+        return jsonResponse;
+    }
+
+    @PostMapping(value = {"/getFilesByProcessInsId", "/getFilesByProcessInsId/sso", "/getFilesByProcessInsId/api"})
+    @ResponseBody
+    public JsonResponse getFilesByProcessInsId(@RequestParam(value = "processInsId") String processInsId,
+                                               @RequestParam(value = "appCode") String appCode) {
+        List<SysFile> sysFiles = fileService.getFilesByProcessInsId( processInsId);
+        JsonResponse jsonResponse = null != sysFiles ? JsonResponse.success(sysFiles) : JsonResponse.defaultErrorResponse();
         return jsonResponse;
     }
 
@@ -439,7 +478,7 @@ public class SysFileController extends LogicController<SysFile, String> {
     @RequestMapping(value = {"/get/url", "/get/url/sso", "/get/url/api"}, method = {RequestMethod.POST, RequestMethod.GET})
     @ResponseBody
     public ResponseEntity openurlNoRedirect(@RequestParam String url) throws Exception {
-        return new ResponseEntity(JsonResponse.success(getOfficeweb365Url(url), EMPTY), HttpStatus.OK);
+        return new ResponseEntity(JsonResponse.success(getOfficeweb365Url(url), ApplicationConstants.EMPTY), HttpStatus.OK);
     }
 
     /**
@@ -456,7 +495,7 @@ public class SysFileController extends LogicController<SysFile, String> {
      * @return
      * @throws Exception
      */
-/*    @RequestMapping(value = {"/getRedirectUrl", "/getRedirectUrl/sso", "/getRedirectUrl/api"}, method = {RequestMethod.POST, RequestMethod.GET})
+    @RequestMapping(value = {"/getRedirectUrl", "/getRedirectUrl/sso", "/getRedirectUrl/api"}, method = {RequestMethod.POST, RequestMethod.GET})
     @ResponseBody
     public ResponseEntity getOfficeweb365RedirectUrl(@RequestParam String url) throws Exception {
         //先获取在浏览器通过Officeweb365可以通过的地址
@@ -467,8 +506,8 @@ public class SysFileController extends LogicController<SysFile, String> {
         webClient.getOptions().setCssEnabled(false);
         String redirectUrl = webClient.getPage(url).getUrl().toString();
         webClient.close(); //关闭webclient
-        return new ResponseEntity(JsonResponse.success(redirectUrl, EMPTY), HttpStatus.OK);
-    }*/
+        return new ResponseEntity(JsonResponse.success(redirectUrl, ApplicationConstants.EMPTY), HttpStatus.OK);
+    }
 
     private String getOfficeweb365Url(String url) throws Exception {
         if (UrlEncoderUtils.hasUrlEncoded(url)) {
@@ -513,7 +552,30 @@ public class SysFileController extends LogicController<SysFile, String> {
         return jsonResponse;
     }
 
-
+//    /**
+//     * 涉及到具体对象的操作，所以不直接暴露接口
+//     *
+//     * @param uploadfile
+//     * @param pmInsType
+//     * @param pmInsId
+//     * @param pmInsTypePart
+//     * @param clazz
+//     * @param <T>
+//     * @throws IOException
+//     * @rn
+//     */
+//    private <T> JsonResponse importExcel(MultipartFile uploadfile,
+//                                         String pmInsType,
+//                                         String pmInsId, //起草阶段上传文件，可不填写业务单据ID
+//                                         String pmInsTypePart,
+//                                         Class<T> clazz) throws IOException {
+//        UploadFileResponse uploadFileResponse = fileService.importExcel(uploadfile, pmInsType, pmInsId, pmInsTypePart, clazz);
+//        if (null != uploadFileResponse) {
+//            return JsonResponse.success(uploadFileResponse);
+//        } else {
+//            return JsonResponse.defaultErrorResponse();
+//        }
+//    }
 
     /**
      * 扫描不可读取的文件，可成功读取标识为1，因文件乱码等原因不可读取标识为-1，文件记录主键与文件路径名称一致为2
@@ -579,4 +641,19 @@ public class SysFileController extends LogicController<SysFile, String> {
 
 
 
+    public static void main(String[] args) throws Exception {
+        WebOffice3Des webOffice3Des = new WebOffice3Des();
+        AppConfig config = new AppConfig();
+        config.setAppHostPort("http://211.138.31.210:8088");
+        SysFileController sysFileController = new SysFileController(null);
+        sysFileController.setConfig(config);
+        String url = "http://10.87.13.91:8888/20200525/DemoExcel.xlsx";
+        System.out.println(sysFileController.getOfficeweb365Url(url));
+        url = "http://10.87.13.91:8888/20200525/DemoPdf.pdf";
+        System.out.println(sysFileController.getOfficeweb365Url(url));
+        url = "http://10.87.13.91:8888/20200525/DemoPpt.pptx";
+        System.out.println(sysFileController.getOfficeweb365Url(url));
+        url = "http://10.87.13.91:8888/20200525/DemoWord.doc";
+        System.out.println(sysFileController.getOfficeweb365Url(url));
+    }
 }

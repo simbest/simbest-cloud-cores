@@ -3,7 +3,6 @@
  */
 package com.simbest.cloud.cores.sys.repository;
 
-
 import com.simbest.cloud.cores.base.repository.LogicRepository;
 import com.simbest.cloud.cores.sys.model.SysCustomFieldValue;
 import org.springframework.stereotype.Repository;

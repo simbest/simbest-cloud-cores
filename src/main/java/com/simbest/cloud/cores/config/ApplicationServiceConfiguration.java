@@ -5,8 +5,12 @@ package com.simbest.cloud.cores.config;
 
 
 import com.simbest.cloud.cores.base.service.IGenericService;
+import com.simbest.cloud.cores.base.service.ISystemService;
 import com.simbest.cloud.cores.base.service.impl.GenericService;
-import com.simbest.cloud.cores.util.distribution.id.repository.SysRedisIdKeyRepository;
+import com.simbest.cloud.cores.base.service.impl.SystemService;
+import com.simbest.cloud.cores.sys.repository.SysLogLoginAdminRepository;
+import com.simbest.cloud.cores.sys.repository.SysTaskExecutedLogRepository;
+import com.simbest.boot.util.distribution.id.repository.SysRedisIdKeyRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,7 +23,11 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ApplicationServiceConfiguration {
 
-
+    @Bean(name = "sysTaskExecutedLogService")
+    @Autowired
+    public ISystemService sysTaskExecutedLogService(SysTaskExecutedLogRepository repository) {
+        return new SystemService(repository);
+    }
 
     @Bean(name = "sysRedisIdKeyService")
     @Autowired
@@ -27,4 +35,9 @@ public class ApplicationServiceConfiguration {
         return new GenericService<>(repository);
     }
 
+    @Bean(name = "sysLogLoginAdminService")
+    @Autowired
+    public IGenericService sysLogLoginAdminService(SysLogLoginAdminRepository repository) {
+        return new GenericService(repository);
+    }
 }

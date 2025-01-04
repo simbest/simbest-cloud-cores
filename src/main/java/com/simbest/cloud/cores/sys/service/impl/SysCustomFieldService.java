@@ -4,13 +4,14 @@
 package com.simbest.cloud.cores.sys.service.impl;
 
 
-import com.simbest.cloud.cores.base.annotations.AnnotationUtils;
+
+import com.simbest.cloud.cores.annotations.AnnotationUtils;
 import com.simbest.cloud.cores.base.service.impl.LogicService;
 import com.simbest.cloud.cores.constants.ApplicationConstants;
 import com.simbest.cloud.cores.sys.model.SysCustomField;
 import com.simbest.cloud.cores.sys.repository.SysCustomFieldRepository;
 import com.simbest.cloud.cores.sys.service.ISysCustomFieldService;
-import com.simbest.cloud.cores.util.SecurityUtils;
+import com.simbest.cloud.cores.security.utils.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CachePut;

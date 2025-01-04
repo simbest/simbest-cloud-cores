@@ -3,28 +3,26 @@
  */
 package com.simbest.cloud.cores.component;
 
-
 import com.simbest.cloud.cores.config.AppConfig;
 import com.simbest.cloud.cores.constants.ApplicationConstants;
 import com.simbest.cloud.cores.exception.Exceptions;
 import com.simbest.cloud.cores.sys.service.IAppShutdownService;
-import com.simbest.cloud.cores.util.RedisUtil;
-import com.simbest.cloud.cores.util.SpringContextUtil;
+import com.simbest.cloud.cores.redis.RedisUtil;
+import com.simbest.cloud.cores.utils.ApplicationContextProvider;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.catalina.connector.Connector;
 import org.apache.commons.io.FileUtils;
-import org.apache.tomcat.util.threads.ThreadPoolExecutor;
 import org.springframework.boot.web.embedded.tomcat.TomcatConnectorCustomizer;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
-import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -33,25 +31,18 @@ import java.util.concurrent.TimeUnit;
  * 时间: 2019/8/29  14:49
  */
 @Slf4j
-@Component
 public class GracefulShutdown implements TomcatConnectorCustomizer, ApplicationListener<ContextClosedEvent> {
 
     public static final String SHUTDOWN_FLAG = "#######################################################";
 
     private AppConfig appConfig;
 
-    private SpringContextUtil springContextUtil;
-
     private static final int TIMEOUT = 30;
 
     private volatile Connector connector;
 
-
-
-
-    public GracefulShutdown(AppConfig appConfig, SpringContextUtil springContextUtil){
+    public GracefulShutdown(AppConfig appConfig){
         this.appConfig = appConfig;
-        this.springContextUtil = springContextUtil;
     }
 
     @Override
@@ -61,16 +52,18 @@ public class GracefulShutdown implements TomcatConnectorCustomizer, ApplicationL
 
     @Override
     public void onApplicationEvent(ContextClosedEvent event) {
-
         log.debug("应用即将被关闭，销毁前清理工作".concat(SHUTDOWN_FLAG).concat("START"));
-        IAppShutdownService appShutdownService = springContextUtil.getBean(IAppShutdownService.class);
-        appShutdownService.gracefulShutdown();
+        Map<String, IAppShutdownService> appShutdownService = event.getApplicationContext().getBeansOfType(IAppShutdownService.class);
+        for (Map.Entry<String, IAppShutdownService> map : appShutdownService.entrySet()) {
+            map.getValue().gracefulShutdown();
+        }
+//        IAppShutdownService appShutdownService = ApplicationContextProvider.getBean(IAppShutdownService.class);
+//        appShutdownService.gracefulShutdown();
         //程序销毁的时候， 删除reids缓存中放的tmp开头的临时变量
         log.debug("正在模糊删除Redis的Key键关键字包含【{}】的缓存".concat(SHUTDOWN_FLAG), ApplicationConstants.REDIS_TEMP_KEY);
         RedisUtil.mulDelete(ApplicationConstants.REDIS_TEMP_KEY);
         log.debug("清理异步定时任务".concat(SHUTDOWN_FLAG).concat("START"));
-
-        Map<String, ThreadPoolTaskScheduler> schedulerMap = springContextUtil.getBeansOfType(ThreadPoolTaskScheduler.class);
+        Map<String, ThreadPoolTaskScheduler> schedulerMap = event.getApplicationContext().getBeansOfType(ThreadPoolTaskScheduler.class);
         for (Map.Entry<String, ThreadPoolTaskScheduler> map : schedulerMap.entrySet()) {
             log.debug("已关闭【{}】异步定时任务", map.getKey());
             map.getValue().shutdown();
@@ -79,7 +72,7 @@ public class GracefulShutdown implements TomcatConnectorCustomizer, ApplicationL
         log.debug("清理异定时任务".concat(SHUTDOWN_FLAG).concat("END"));
 
         log.debug("清理异步多线程".concat(SHUTDOWN_FLAG).concat("START"));
-        Map<String, ThreadPoolTaskExecutor> executorMap = springContextUtil.getBeansOfType(ThreadPoolTaskExecutor.class);
+        Map<String, ThreadPoolTaskExecutor> executorMap = event.getApplicationContext().getBeansOfType(ThreadPoolTaskExecutor.class);
         for (Map.Entry<String, ThreadPoolTaskExecutor> map : executorMap.entrySet()) {
             log.debug("已关闭【{}】多线程", map.getKey());
             map.getValue().shutdown();
@@ -106,7 +99,7 @@ public class GracefulShutdown implements TomcatConnectorCustomizer, ApplicationL
             }
         }
         else{
-            log.warn("executor非ThreadPoolExecutor，具体类型为【{}】", executor.getClass().getName());
+            log.warn("executor非ThreadPoolExecutor，具体类型为【{}】", executor);
         }
         //程序销毁的时候， 删除应用临时上传的文件
         try{

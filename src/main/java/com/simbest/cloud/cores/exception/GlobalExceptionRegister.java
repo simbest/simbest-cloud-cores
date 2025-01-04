@@ -1,13 +1,13 @@
 package com.simbest.cloud.cores.exception;
 
 
-import com.alibaba.nacos.shaded.com.google.common.collect.Maps;
-import com.github.stuxuhai.jpinyin.ChineseHelper;
-import com.simbest.cloud.cores.common.web.response.JsonResponse;
+import com.google.common.collect.Maps;
+import com.simbest.cloud.cores.constants.AuthoritiesConstants;
 import com.simbest.cloud.cores.constants.ErrorCodeConstants;
 import com.simbest.cloud.cores.exceptions.InsertExistObjectException;
 import com.simbest.cloud.cores.exceptions.UpdateNotExistObjectException;
-import com.simbest.cloud.cores.util.DateUtil;
+import com.simbest.cloud.cores.response.JsonResponse;
+import com.simbest.cloud.cores.utils.DateUtil;
 import jakarta.persistence.NonUniqueResultException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -24,8 +24,6 @@ import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartException;
 
 import java.util.Map;
-
-import static com.simbest.cloud.cores.constants.AuthoritiesConstants.ACCESS_FORBIDDEN;
 
 
 /**
@@ -55,7 +53,7 @@ public final class GlobalExceptionRegister {
 
         //权限相关异常
         errorMap.put(AccessDeniedException.class,
-                JsonResponse.builder().errcode(HttpStatus.FORBIDDEN.value()).status(HttpStatus.FORBIDDEN.value()).error(HttpStatus.FORBIDDEN.name()).message(ACCESS_FORBIDDEN).build());
+                JsonResponse.builder().errcode(HttpStatus.FORBIDDEN.value()).status(HttpStatus.FORBIDDEN.value()).error(HttpStatus.FORBIDDEN.name()).message(AuthoritiesConstants.ACCESS_FORBIDDEN).build());
 
         //文件相关异常
         errorMap.put(MultipartException.class,
@@ -133,7 +131,7 @@ public final class GlobalExceptionRegister {
             constraintField = StringUtils.substringBefore(constraintField, "]");
             response.setMessage("数据【".concat(constraintField).concat("】不可重复"));
         }
-        else if(StringUtils.isNotEmpty(e.getMessage()) && ChineseHelper.containsChinese(e.getMessage())){
+        else if(StringUtils.isNotEmpty(e.getMessage()) ){
             response.setMessage(e.getMessage());
         }
         else if(StringUtils.isEmpty(response.getMessage())){

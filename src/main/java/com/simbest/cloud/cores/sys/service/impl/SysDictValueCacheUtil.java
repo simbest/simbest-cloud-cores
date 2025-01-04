@@ -7,7 +7,7 @@ package com.simbest.cloud.cores.sys.service.impl;
 import com.simbest.cloud.cores.config.AppConfig;
 import com.simbest.cloud.cores.constants.ApplicationConstants;
 import com.simbest.cloud.cores.sys.model.SysDictValue;
-import com.simbest.cloud.cores.util.RedisUtil;
+import com.simbest.cloud.cores.redis.RedisUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;

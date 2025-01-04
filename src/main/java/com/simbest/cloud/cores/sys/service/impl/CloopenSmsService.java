@@ -3,11 +3,13 @@
  */
 package com.simbest.cloud.cores.sys.service.impl;
 
-import com.alibaba.nacos.shaded.com.google.common.collect.Maps;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.google.common.collect.Maps;
+
 import com.simbest.cloud.cores.sys.service.ISimpleSmsService;
-import com.simbest.cloud.cores.util.DateUtil;
-import com.simbest.cloud.cores.util.json.JacksonUtils;
+import com.simbest.cloud.cores.utils.CodeGenerator;
+import com.simbest.cloud.cores.utils.DateUtil;
+import com.simbest.cloud.cores.json.JacksonUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -88,9 +90,9 @@ public class CloopenSmsService implements ISimpleSmsService {
         paramters.put("to", phone);
         paramters.put("appId", appId);
         paramters.put("templateId", templateId);
-        //String retCode = CodeGenerator.randomInt(4);
+        String retCode = CodeGenerator.randomInt(4);
         paramters.put("datas", contents);
-        //String jsonPara = JacksonUtils.obj2json(paramters);
+        String jsonPara = JacksonUtils.obj2json(paramters);
         String Authorization= account+":"+now;
         log.debug("Authorization: "+Authorization);
         Authorization = Base64.encodeBase64String(Authorization.getBytes());

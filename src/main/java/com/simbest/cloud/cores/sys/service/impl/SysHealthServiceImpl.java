@@ -4,24 +4,27 @@
 package com.simbest.cloud.cores.sys.service.impl;
 
 import cn.hutool.core.io.FileUtil;
-import com.simbest.cloud.cores.base.enums.StoreLocation;
 import com.simbest.cloud.cores.config.AppConfig;
 import com.simbest.cloud.cores.config.EmbeddedServletConfiguration;
 import com.simbest.cloud.cores.config.ExtraConfig;
 import com.simbest.cloud.cores.config.RedisConfiguration;
 import com.simbest.cloud.cores.constants.ApplicationConstants;
+import com.simbest.cloud.cores.enums.StoreLocation;
 import com.simbest.cloud.cores.exception.Exceptions;
 import com.simbest.cloud.cores.sys.model.SysFile;
 import com.simbest.cloud.cores.sys.model.SysHealth;
 import com.simbest.cloud.cores.sys.service.IHeartTestService;
 import com.simbest.cloud.cores.sys.service.ISimpleSmsService;
 import com.simbest.cloud.cores.sys.service.ISysHealthService;
-import com.simbest.cloud.cores.util.AppFileUtil;
-import com.simbest.cloud.cores.util.RedisUtil;
-import com.simbest.cloud.cores.util.server.HostUtil;
+import com.simbest.cloud.cores.utils.files.AppFileUtil;
+import com.simbest.cloud.cores.redis.RedisUtil;
+import com.simbest.cloud.cores.utils.files.FastDfsClient;
+import com.simbest.cloud.cores.utils.server.HostUtil;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+
+import org.csource.fastdfs.ProtoCommon;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -69,7 +72,7 @@ public class SysHealthServiceImpl implements ISysHealthService, IHeartTestServic
     private SysFile testSysFile;
 
     /**
-     * @see com.simbest.boot.component.task.HeartTestTask
+     *
      */
     @PostConstruct
     public void init() throws Exception {
@@ -87,7 +90,7 @@ public class SysHealthServiceImpl implements ISysHealthService, IHeartTestServic
     public SysHealth databaseCheck(){
         try {
             List result = jdbcTemplate.queryForList(validationQuery);
-            if(!result.isEmpty()) {
+            if(null != result && result.size() > ApplicationConstants.ZERO) {
                 log.info("数据库连接【{}】测试OK", config.getDatasourceUrl());
                 return SysHealth.builder().result(true).build();
             }
@@ -179,7 +182,7 @@ public class SysHealthServiceImpl implements ISysHealthService, IHeartTestServic
                     Integer fastdfsPort = Integer.valueOf(fastdfsServer.split(ApplicationConstants.COLON)[1]);
                     if(HostUtil.checkTelnet(fastdfsHost, fastdfsPort)){
                         try {
-/*                            boolean fastdfsResult = ProtoCommon.activeTest(FastDfsClient.getTrackerServer().getSocket());
+                            boolean fastdfsResult = ProtoCommon.activeTest(FastDfsClient.getTrackerServer().getSocket());
                             if(!fastdfsResult){
                                 log.error("FastDFS主机".concat(fastdfsHost).concat("端口").concat(fastdfsPort.toString())+"官方SDK检测失败!");
                                 sysHealth.setResult(false);
@@ -187,7 +190,7 @@ public class SysHealthServiceImpl implements ISysHealthService, IHeartTestServic
                             }
                             else{
                                 log.info("FastDfs主机【{}】端口【{}】测试OK", fastdfsHost, fastdfsPort);
-                            }*/
+                            }
                         }
                         catch(Exception e){
                             log.error("FastDFS主机".concat(fastdfsHost).concat("端口").concat(fastdfsPort.toString())+"检测异常：".concat(e.getMessage()));

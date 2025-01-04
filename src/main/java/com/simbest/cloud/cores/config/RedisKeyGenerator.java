@@ -3,7 +3,6 @@
  */
 package com.simbest.cloud.cores.config;
 
-
 import com.simbest.cloud.cores.constants.ApplicationConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;

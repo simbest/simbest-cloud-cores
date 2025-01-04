@@ -1,6 +1,3 @@
-/*
- * 版权所有 © 北京晟壁科技有限公司 2008-2027。保留一切权利!
- */
 package com.simbest.cloud.cores.config;
 
 import jakarta.annotation.PostConstruct;
@@ -8,61 +5,24 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
-import org.springframework.stereotype.Component;
+import org.springframework.context.annotation.Configuration;
 
 import java.util.List;
 
 import static com.simbest.cloud.cores.constants.ApplicationConstants.COMMA;
 import static com.simbest.cloud.cores.constants.ApplicationConstants.SLASH;
 
-
-/**
- * 用途：应用配置
- * 参考: https://segmentfault.com/a/1190000016941757
- *
- * @ConfigurationProperties(prefix = "doc")
- *
- * private boolean preferIpAddress;
- * private int maxConnections=0;
- * private int port;
- * private AuthInfo authInfo;
- * private List<String> whitelist;
- * private Map<String,String> converter;
- * private List<Person> defaultShareUsers;
- *
- * doc.prefer-ip-address=true
- * doc.port=8080
- * doc.max-connections=30
- * #doc.whitelist=192.168.0.1,192.168.0.2
- * # 这种等同于下面的doc.whitelist[0] doc.whitelist[1]
- * doc.whitelist[0]=192.168.0.1
- * doc.whitelist[1]=192.168.0.2
- * doc.default-share-users[0].name=jack
- * doc.default-share-users[0].age=18
- * doc.converter.a=xxConverter
- * doc.converter.b=xxConverter
- * doc.auth-info.username=user
- * doc.auth-info.password=password
- *
- * 作者: lishuyi
- * 时间: 2018/8/16  13:52
- */
 @Slf4j
 @Data
-@Component
-@RefreshScope
+@Configuration
+//@RefreshScope
 public class AppConfig {
-
-//    @Value("${app.oa.portal.token:SIMBEST_SSO}")
-//    private String mochaPortalToken;
+    @Value("${app.oa.portal.token:SIMBEST_SSO}")
+    private String mochaPortalToken;
     @Value("${logback.artifactId}")
     private String appcode;
     @Value("${app.host.port}")
     private String appHostPort;
-    @Value("${app.cloud.auth.public.key:MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDI90D8sRwU5rwagj9fgNQAFH/Ws03jR+qYUUtA3iI05IaqDLrVDdvMQU446/6c+nyJBtdO3P95+dLg7UVQn1bQSj1wLWa5nuJvTh5paBe1XWZj/HmISTpq+OhyGKmX5xNRU96fDld03JyrgEbmHb9T8jks7g5FhKmZmLJBeRTpoQIDAQAB}")
-    private String cloudPublicKey;
-    @Value("${app.cloud.auth.private.key:MIICdQIBADANBgkqhkiG9w0BAQEFAASCAl8wggJbAgEAAoGBAMj3QPyxHBTmvBqCP1+A1AAUf9azTeNH6phRS0DeIjTkhqoMutUN28xBTjjr/pz6fIkG107c/3n50uDtRVCfVtBKPXAtZrme4m9OHmloF7VdZmP8eYhJOmr46HIYqZfnE1FT3p8OV3TcnKuARuYdv1PyOSzuDkWEqZmYskF5FOmhAgMBAAECgYASt7S91GEhMTxj2627X2xfdYlSnfCrMo+PEENKD2ZwNri0LetY3KmUJKD8fD6CsHHY8WIsXjkNS09w06iZEb4sDf1PLluo+HJTZsRWBb7Wa+PEdVwVwjO8FFnsmO3G9E/ObWQdlxMLbJeXN1l4uqbhSpkO/aTo7o/CzbQLbxtyAQJBAOESrdrO1o6OW/ztwFqHv+n0FmN/knHiHjJt5ILZE8QJAqi/pxUIbXmIOIDhbFVE9Foq5arN70rn0uROavVanAkCQQDklJDZBEmPWfQRc+YHp5sVEwBhl9u+HlPRTIwfnNnxGaBRGHgCAWti9BRtFPK7aMLYYGngHCke4u9onH4kJvbZAkBRINGICHxwQEJKJkzqlPoJU5FqZgachDwMQ25V9/dW90R9HTAVtcb4QrDTS+4nwkYt5j6I1dhGcM+kudt1+yY5AkA7qZONMZNJuX79NzUpdlQCUi1dS9ftbdkO3l4MulIgnkG8KRjZ3Sj8cR0Lw9X/mL6S38eC2ZbaGv3GXmKGaS0xAkBXUk5oNzRizhKyZDPfuaCaKMKySVhY2si3OQkuRd7vBbuZT3hgIwQxSX6oti9DCjnxHWj6+Fu+gy7VoNQnx32U}")
-    private String cloudPrivateKey;
     @Value("${server.servlet.context-path}")
     private String contextPath;
     @Value("${server.servlet.session.timeout}")
@@ -102,13 +62,19 @@ public class AppConfig {
     private String a4LogserverAccount;
     @Value("${app.a4.logserver.password:5*QCKxJM}")
     private String a4LogserverPassword;
+    public static final String DEFAULT_4A_LOGFILE_PATH = "/home/aiuap/gather/";
     @Value("${app.a4.logserver.filePath:/home/aiuap/gather/}")   //需要应用侧进行配置，如：/home/aiuap/gather/MGDICT/
     private String a4LogserverFilePath;
     @Value("#{'${app.a4.sendFile.fail.noticers:sjbg,hadmin2}'.split(',')}")
     private List<String>  a4LogSendFailNoticers;
 
-
-    @Value("${app.allowed.origins:*}")
+    @Value("${app.sso.force.time:false}")
+    private Boolean ssoForceTime;
+    @Value("${app.sso.salt:Xianzai@2099}")
+    private String ssoSalt;
+    @Value("${app.sso.time:1}")
+    private Integer ssoTime; //默认1分钟，即单点支持前后2分钟
+    @Value("${app.allowed.origins:*}") //app.allowed.origins=http://iportal.ha.cmcc
     private String allowedOrigins;
     public static final String uploadTmpFileDir = "springboottmp";
     private String uploadTmpFileLocation;
@@ -234,18 +200,18 @@ public class AppConfig {
     @Value("${spring.data.mongodb.password:}")
     private String mongodbPassword;
 
-
+    @Value("${app.cloud.auth.public.key:MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDI90D8sRwU5rwagj9fgNQAFH/Ws03jR+qYUUtA3iI05IaqDLrVDdvMQU446/6c+nyJBtdO3P95+dLg7UVQn1bQSj1wLWa5nuJvTh5paBe1XWZj/HmISTpq+OhyGKmX5xNRU96fDld03JyrgEbmHb9T8jks7g5FhKmZmLJBeRTpoQIDAQAB}")
+    private String cloudPublicKey;
 
     @PostConstruct
     public void init() {
         log.info("************************************应用配置START**************************************************");
-
         log.info("应用注册代码【{}】", appcode);
         log.info("应用访问地址【{}】", appHostPort);
         log.info("应用访问上下文【{}】", contextPath);
+        log.info("应用门户单点加密令牌【{}】", mochaPortalToken);
         log.info("应用超时时间【{}】秒", sessionTimeout);
         log.info("应用上传文件大小限制【{}】", maxFileSize);
-        log.info("应用Cookie路径【{}】", cookiePath);
         log.info("应用请求主数据地址【{}】", uumsAddress);
         log.info("应用接口文档地址【{}】", String.format("%s%s/swagger-ui.html", appHostPort, contextPath));
         log.info("应用请求接收访问登录页地址的IP白名单为【{}】", String.join(COMMA, loginWhiteIplist));
@@ -256,7 +222,10 @@ public class AppConfig {
         log.info("4A上传审计日志文件服务器路径地址【{}】", a4LogserverFilePath);
         log.info("清理用户缓存开关【{}】", isCleanCacheUser ? true : false);
         log.info("清理用户缓存定时任务执行周期【{}】", cleanCacheUserTime);
-        log.info("跨域访问列表【{}】", allowedOrigins);
+        log.info("SSO单点认证强制启用时间戳【{}】", ssoForceTime);
+        log.info("SSO单点认证加密盐值【{}】", ssoSalt);
+        log.info("SSO单点认证时间间隔【{}】分钟", ssoTime);
+        log.info("Cors跨域请求访问列表【{}】", allowedOrigins);
         uploadTmpFileLocation = System.getProperty("user.dir").concat(SLASH).concat(uploadTmpFileDir).concat(contextPath);
         log.info("应用临时文件上传目录为【{}】", uploadTmpFileLocation);
         log.info("应用获准访问白名单【{}】", whiteHostList);
@@ -284,21 +253,21 @@ public class AppConfig {
         log.info("");
         log.info("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^REDIS缓存配置START^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
         log.info("Redis配置方式【{}】", redisConfigType);
-        RedisConfiguration.RedisConfigType redisConfigTypeEnum = Enum.valueOf(RedisConfiguration.RedisConfigType.class, redisConfigType);
-        if(RedisConfiguration.RedisConfigType.dictValueRedis.equals(redisConfigTypeEnum) ) {
-            log.info("Redis主数据中配置项为【{}】", redisConfigTypeRedis);
-        }
-        else if(RedisConfiguration.RedisConfigType.ftpRedis.equals(redisConfigTypeEnum) ||
-                RedisConfiguration.RedisConfigType.sftpRedis.equals(redisConfigTypeEnum) ) {
-            log.info("Redis (S)FTP用户名【{}】", redisFtpUsername);
-            log.info("Redis (S)FTP密码【{}】", redisFtpPassword);
-            log.info("Redis (S)FTP主机【{}】", redisFtpHost);
-            log.info("Redis (S)FTP端口【{}】", redisFtpPort);
-            log.info("Redis (S)FTP私钥文件【{}】", redisFtpKeyFile);
-            log.info("Redis (S)FTP私钥密码【{}】", redisFtpPassphrase);
-            log.info("Redis (S)FTP节点配置目录【{}】", redisFtpNodeConfigDirectory);
-            log.info("Redis (S)FTP节点配置文件【{}】", redisFtpNodeConfigFile);
-        }
+//        RedisConfiguration.RedisConfigType redisConfigTypeEnum = Enum.valueOf(RedisConfiguration.RedisConfigType.class, redisConfigType);
+//        if(RedisConfiguration.RedisConfigType.dictValueRedis.equals(redisConfigTypeEnum) ) {
+//            log.info("Redis主数据中配置项为【{}】", redisConfigTypeRedis);
+//        }
+//        else if(RedisConfiguration.RedisConfigType.ftpRedis.equals(redisConfigTypeEnum) ||
+//                RedisConfiguration.RedisConfigType.sftpRedis.equals(redisConfigTypeEnum) ) {
+//            log.info("Redis (S)FTP用户名【{}】", redisFtpUsername);
+//            log.info("Redis (S)FTP密码【{}】", redisFtpPassword);
+//            log.info("Redis (S)FTP主机【{}】", redisFtpHost);
+//            log.info("Redis (S)FTP端口【{}】", redisFtpPort);
+//            log.info("Redis (S)FTP私钥文件【{}】", redisFtpKeyFile);
+//            log.info("Redis (S)FTP私钥密码【{}】", redisFtpPassphrase);
+//            log.info("Redis (S)FTP节点配置目录【{}】", redisFtpNodeConfigDirectory);
+//            log.info("Redis (S)FTP节点配置文件【{}】", redisFtpNodeConfigFile);
+//        }
         log.info("Redis密码【{}】", redisPassword);
         log.info("Redis重定向次数【{}】", redisMaxRedirects);
         log.info("Redis缓存空间前缀【{}】", redisNamespace);
@@ -321,7 +290,4 @@ public class AppConfig {
         log.info("####################################文件存储配置END##################################################");
         log.info("");
     }
-
-
-
 }

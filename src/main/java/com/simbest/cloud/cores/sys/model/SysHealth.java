@@ -3,10 +3,13 @@
  */
 package com.simbest.cloud.cores.sys.model;
 
-
+import com.simbest.cloud.cores.annotations.EntityIdPrefix;
+import com.simbest.cloud.cores.base.model.LogicModel;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
+import org.hibernate.annotations.GenericGenerator;
 
+import jakarta.persistence.*;
 /**
  * 用途：系统健康检查模型
  * 作者: lishuyi
@@ -17,7 +20,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Schema(name = "系统管理-系统健康检查模型")
+@Schema(description = "系统管理-系统健康检查模型")
 public class SysHealth {
 
     private Boolean result;

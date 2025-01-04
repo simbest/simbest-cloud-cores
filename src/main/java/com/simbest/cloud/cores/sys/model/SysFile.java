@@ -4,10 +4,10 @@
 package com.simbest.cloud.cores.sys.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.simbest.cloud.cores.base.annotations.EntityIdPrefix;
-import com.simbest.cloud.cores.base.enums.StoreLocation;
-import com.simbest.cloud.cores.base.model.LogicModel;
 
+import com.simbest.cloud.cores.annotations.EntityIdPrefix;
+import com.simbest.cloud.cores.base.model.LogicModel;
+import com.simbest.cloud.cores.enums.StoreLocation;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.*;
@@ -25,8 +25,7 @@ import org.hibernate.annotations.GenericGenerator;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "sys_file")
-@Schema(name = "系统管理-统一文件管理")
+@Schema(description = "系统管理-统一文件管理")
 public class SysFile extends LogicModel {
 
     //文件不可读取状态
@@ -39,71 +38,71 @@ public class SysFile extends LogicModel {
     @Id
     @Column(name = "id", length = 40)
     @GeneratedValue(generator = "snowFlakeId")
-    @GenericGenerator(name = "snowFlakeId", strategy = "com.simbest.cloud.cores.util.distribution.id.SnowflakeId")
+    @GenericGenerator(name = "snowFlakeId", strategy = "com.simbest.boot.util.distribution.id.SnowflakeId")
     @EntityIdPrefix(prefix = "F") //主键前缀，此为可选项注解
     private String id;
 
-    @Schema(name = "文件名称")
+    @Schema(description = "文件名称")
     @Column(nullable = false, length = 200)
     @NonNull
     private String fileName;
 
-    @Schema(name = "文件类型")
+    @Schema(description = "文件类型")
     @Column(nullable = false, length = 20)
     @NonNull
     private String fileType;
 
-    @Schema(name = "文件实际存储服务器路径")
+    @Schema(description = "文件实际存储服务器路径")
     @Column(nullable = false, length = 500)
     @NonNull
     @JsonIgnore //隐藏不对外暴露内部路径
     private String filePath;
 
-    @Schema(name = "文件大小")
+    @Schema(description = "文件大小")
     @Column(nullable = false, length = 50)
     @NonNull
     private Long fileSize;
 
-    @Schema(name = "归属流程")
+    @Schema(description = "归属流程")
     @Column
     private String pmInsType;
 
-    @Schema(name = "归属流程ID")
+    @Schema(description = "归属流程ID")
     @Column
     private String pmInsId;
 
-    @Schema(name = "归属流程区块")
+    @Schema(description = "归属流程区块")
     @Column
     private String pmInsTypePart;
 
-    @Schema(name = "文件下载URL")
+    @Schema(description = "文件下载URL")
     @Column(nullable = false, length = 500)
     @NonNull
     private String downLoadUrl;
 
-    @Schema(name = "专门用于标识是否跟随应用，不跟随云存储的文件")
+    @Schema(description = "专门用于标识是否跟随应用，不跟随云存储的文件")
     @Column
 //    private Boolean isLocal = false;
     private Integer isLocal;
 
-    @Schema(name = "隐藏不对外暴露内部备份路径")
+    @Schema(description = "隐藏不对外暴露内部备份路径")
     @Column(length = 500)
     @JsonIgnore
     private String backupPath;
 
-    @Schema(name = "手机端下载路径")
+    @Schema(description = "手机端下载路径")
     @Column(length = 500)
     private String mobileFilePath;
 
-    @Schema(name = "API下载路径")
+    @Schema(description = "API下载路径")
     @Column(length = 500)
     private String apiFilePath;
 
-    @Schema(name = "匿名端下载路径")
+    @Schema(description = "匿名端下载路径")
     @Column(length = 500)
     private String anonymousFilePath;
 
-    @Schema(name = "文件存储方式")
+    @Schema(description = "文件存储方式")
     @Column(length = 10)
     @Enumerated(EnumType.STRING)
     private StoreLocation storeLocation;

@@ -1,0 +1,1304 @@
+/*
+ * 版权所有 © 北京晟壁科技有限公司 2008-2027。保留一切权利!
+ */
+
+package com.simbest.cloud.cores.uums.api.user;
+
+import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.lang.Dict;
+import cn.hutool.core.util.ObjectUtil;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
+
+import com.simbest.boot.security.*;
+import com.simbest.cloud.cores.base.web.request.ReqHeader;
+import com.simbest.cloud.cores.component.distributed.lock.AppRuntimeMaster;
+import com.simbest.cloud.cores.config.AppConfig;
+import com.simbest.cloud.cores.constants.ApplicationConstants;
+import com.simbest.cloud.cores.constants.AuthoritiesConstants;
+import com.simbest.cloud.cores.json.JacksonUtils;
+import com.simbest.cloud.cores.redis.RedisUtil;
+import com.simbest.cloud.cores.response.ApiRequestHandle;
+import com.simbest.cloud.cores.response.JsonResponse;
+import com.simbest.cloud.cores.security.service.IAuthUserCacheService;
+import com.simbest.cloud.cores.security.utils.LoginUtils;
+import com.simbest.cloud.cores.security.utils.SecurityUtils;
+import com.simbest.cloud.cores.utils.encrypt.RsaEncryptor;
+import com.simbest.cloud.cores.utils.http.client.HttpClient;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.stereotype.Component;
+import org.springframework.util.Assert;
+
+import java.util.*;
+
+import static com.simbest.cloud.cores.constants.AuthoritiesConstants.SSO_AUTH_HADMIN;
+
+
+/**
+ * <strong>Title : SysAppController</strong><br>
+ * <strong>Description : </strong><br>
+ * <strong>Create on : 2018/5/26/026</strong><br>
+ * <strong>Modify on : 2018/5/26/026</strong><br>
+ * <strong>Copyright (C) Ltd.</strong><br>
+ *
+ * @author LM liumeng@simbest.com.cn
+ * @version <strong>V1.0.0</strong><br>
+ *          <strong>修改历史:</strong><br>
+ *          修改人 修改日期 修改描述<br>
+ *          -------------------------------------------<br>
+ */
+
+@SuppressWarnings("All")
+@Component
+@Slf4j
+public class UumsSysUserinfoApi {
+
+    private static final String USER_MAPPING = "/action/user/user/";
+
+    private static final String SSO = "/sso";
+
+    private static final String SSO_NEW = "sso/";
+
+    public static final String UUMS_USER_DETAILS = "details";
+    public static final String UUMS_USER_USERNAME = "USERNAME";
+
+    @Autowired
+    private AppConfig config;
+
+    @Autowired
+    private RsaEncryptor encryptor;
+
+    @Autowired
+    private ApiRequestHandle<SimpleUser> simpleUserApiHandle;
+
+    @Autowired
+    private ApiRequestHandle<Set<SimpleUser>> setSimpleUserApiHandle;
+
+    @Autowired
+    private ApiRequestHandle<Set<String>> setStrApiHandle;
+
+    @Autowired
+    private ApiRequestHandle<List<UserOrgTree>> userOrgTreeApiHandle;
+
+    @Autowired
+    private ApiRequestHandle<Set<UserOrgTree>> userOrgTreeSetApiHandle;
+
+    @Autowired
+    private ApiRequestHandle<Map<String,Object>> mapUserApiHandlemapUserApiHandle;
+
+    @Autowired
+    private LoginUtils loginUtils;
+
+    @Autowired
+    private IAuthUserCacheService authUserCacheService;
+
+    @Autowired
+    private AppRuntimeMaster appRuntimeMaster;
+
+    /**
+     * 插入reserve4
+     * @param password
+     * @return
+     */
+    public JsonResponse insertReserve4(String username,String password){
+        log.debug("Http remote request user by username: {}", username);
+        JsonResponse response= HttpClient.post(config.getUumsAddress() + USER_MAPPING + "insertReserve4")
+                .param(username, encryptor.encrypt(username))
+                .param("password",password)
+                .asBean(JsonResponse.class);
+        return response;
+    }
+
+    /**
+     * 向主数据发起新增用户信息请求
+     * @param keyword
+     * @param keytype
+     * @param appcode
+     * @param simpleUser
+     * @return
+     */
+    public SimpleUser create(String keyword, IAuthService.KeyType keytype, String appcode, SimpleUser simpleUser){
+        String json0=JacksonUtils.obj2json(simpleUser);
+        String keyword1=encryptor.encrypt(keyword);
+        JsonResponse response= HttpClient.textBody(config.getUumsAddress() + USER_MAPPING + "create"+SSO+"?keyword="+keyword1+"&keytype="+keytype
+                +"&appcode="+appcode)
+                .json( json0 )
+                .asBean(JsonResponse.class );
+        if(response==null){
+            log.error("--response对象为空!--");
+            return null;
+        }
+        String json = JacksonUtils.obj2json(response.getData());
+        SimpleUser auth = JacksonUtils.json2obj(json, SimpleUser.class);
+        return auth;
+    }
+
+    /**
+     * 向主数据发起新增用户信息请求
+     * @param keyword
+     * @param keytype
+     * @param appcode
+     * @param simpleUser
+     * @return
+     */
+    public SimpleUser createNew(String keyword,IAuthService.KeyType keytype,String appcode,SimpleUser simpleUser){
+        String json0=JacksonUtils.obj2json(simpleUser);
+        String keyword1=encryptor.encrypt(keyword);
+        Map<String, Object> map = JacksonUtils.json2Type(json0, new TypeReference<Map<String, Object>>() {});
+        if (simpleUser != null){
+            Set<SimplePosition> simplePositions = simpleUser.getAuthPositions();
+            if (CollectionUtil.isNotEmpty(simplePositions)){
+                simplePositions.forEach(simplePosition -> {
+                    map.put("positionId",simplePosition.getId());
+                    map.put("positionIdName",simplePosition.getPositionName());
+                });
+            }
+        }
+        JsonResponse response= HttpClient.textBody(config.getUumsAddress() + USER_MAPPING + SSO_NEW + "create"+"?keyword="+keyword1+"&keytype="+keytype
+                        +"&appcode="+appcode)
+                .json( JacksonUtils.obj2json(map) )
+                .asBean(JsonResponse.class );
+        if(response==null){
+            log.error("--response对象为空!--");
+            return null;
+        }
+        String json = JacksonUtils.obj2json(response.getData());
+        SimpleUser auth = JacksonUtils.json2obj(json, SimpleUser.class);
+        return auth;
+    }
+
+    /**
+     * 向主数据发起更新用户信息请求
+     * @param keyword
+     * @param keytype
+     * @param appcode
+     * @param simpleUser
+     * @return
+     */
+    public SimpleUser update(String keyword,IAuthService.KeyType keytype,String appcode,SimpleUser simpleUser){
+        String json0=JacksonUtils.obj2json(simpleUser);
+        String keyword1=encryptor.encrypt(keyword);
+        JsonResponse response= HttpClient.textBody(config.getUumsAddress() + USER_MAPPING + "update"+SSO+"?keyword="+keyword1+"&keytype="+keytype
+                +"&appcode="+appcode)
+                .json( json0 )
+                .asBean(JsonResponse.class );
+        if(response==null){
+            log.error("--response对象为空!--");
+            return null;
+        }
+        String json = JacksonUtils.obj2json(response.getData());
+        SimpleUser auth = JacksonUtils.json2obj(json, SimpleUser.class);
+        return auth;
+    }
+
+    /**
+     * 向主数据发起更新用户信息请求
+     * @param keyword
+     * @param keytype
+     * @param appcode
+     * @param simpleUser
+     * @return
+     */
+    public SimpleUser updateNew(String keyword,IAuthService.KeyType keytype,String appcode,SimpleUser simpleUser){
+        String json0 = JacksonUtils.obj2json(simpleUser);
+        String keyword1 = encryptor.encrypt(keyword);
+        Map<String, Object> map = JacksonUtils.json2Type(json0, new TypeReference<Map<String, Object>>() {});
+        if (simpleUser != null){
+            Set<SimplePosition> simplePositions = simpleUser.getAuthPositions();
+            if (CollectionUtil.isNotEmpty(simplePositions)){
+                simplePositions.forEach(simplePosition -> {
+                    map.put("positionId",simplePosition.getId());
+                    map.put("positionIdName",simplePosition.getPositionName());
+                });
+            }
+        }
+        JsonResponse response= HttpClient.textBody(config.getUumsAddress() + USER_MAPPING +SSO_NEW + "update"+"?keyword="+keyword1+"&keytype="+keytype
+                        +"&appcode="+appcode)
+                .json( JacksonUtils.obj2json(map) )
+                .asBean(JsonResponse.class );
+        if(response == null){
+            log.error("--response对象为空!--");
+            return null;
+        }
+        String json = JacksonUtils.obj2json(response.getData());
+        SimpleUser auth = JacksonUtils.json2obj(json, SimpleUser.class);
+        return auth;
+    }
+
+    /**
+     * 根据id查找
+     * @param id
+     * @param appcode
+     * @return
+     */
+    public SimpleUser findById(String id, String appcode){
+        String username = SecurityUtils.getCurrentUserName();
+        log.debug("Http remote request user by username: {}", username);
+        JsonResponse response =  HttpClient.post(config.getUumsAddress() + USER_MAPPING + "findById"+SSO)
+                .param(AuthoritiesConstants.SSO_API_USERNAME, encryptor.encrypt(username))
+                .param(AuthoritiesConstants.SSO_API_APP_CODE,appcode )
+                .param("id", String.valueOf(id))
+                .asBean(JsonResponse.class);
+        if(response==null){
+            log.error("--response对象为空!--");
+            return null;
+        }
+        String json = JacksonUtils.obj2json(response.getData());
+        SimpleUser auth = JacksonUtils.json2obj(json, SimpleUser.class);
+        return auth;
+    }
+
+
+    /**
+     * 单表条件查询并分页
+     * @param page
+     * @param size
+     * @param direction
+     * @param properties
+     * @param appcode
+     * @param sysUserinfoMap
+     * @return
+     */
+    public JsonResponse findAll(int page, int size,String direction,String properties,String appcode, Map sysUserinfoMap ) {
+        String username = SecurityUtils.getCurrentUserName();
+        log.debug("Http remote request user by username: {}", username);
+        String json0=JacksonUtils.obj2json(sysUserinfoMap);
+        String username1=encryptor.encrypt(username);
+        String username2=username1.replace("+","%2B");
+        JsonResponse response= HttpClient.textBody(config.getUumsAddress() + USER_MAPPING + "findAll"+SSO+"?loginuser="+username2+"&appcode="+appcode
+                +"&page="+page+"&size="+size+"&direction="+direction+"&properties="+properties)
+                .json( json0 )
+                .asBean(JsonResponse.class );
+        return response;
+    }
+
+    /**
+     * 单表条件查询不分页
+     * @param appcode
+     * @param simpleUserMap
+     * @return
+     */
+    public List<SimpleUser> findAllNoPage(String appcode, Map simpleUserMap ) {
+        String username = SecurityUtils.getCurrentUserName();
+        log.debug("Http remote request user by username: {}", username);
+        String json0=JacksonUtils.obj2json(simpleUserMap);
+        String username1=encryptor.encrypt(username);
+        String username2=username1.replace("+","%2B");
+        JsonResponse response= HttpClient.textBody(config.getUumsAddress() + USER_MAPPING + "findAllNoPage"+SSO+"?loginuser="+username2+"&appcode="+appcode )
+                .json( json0 )
+                .asBean(JsonResponse.class );
+        if(response==null){
+            log.error("--response对象为空!--");
+            return null;
+        }
+        if(!(response.getData() instanceof ArrayList)){
+            log.error("--uums接口返回的类型不为ArrayList--");
+            return null;
+        }
+        String json = JacksonUtils.obj2json(response.getData());
+        List<SimpleUser> userList=JacksonUtils.json2Type(json, new TypeReference<List<SimpleUser>>(){});
+        return userList;
+    }
+
+    /**
+     * 当前人查询别的用户的信息
+     * @param username
+     * @param appcode
+     * @return
+     */
+    public SimpleUser findByUsernameFromCurrent(String username,String appcode) {
+        String loginUser = SecurityUtils.getCurrentUserName();
+        JsonResponse response =  HttpClient.post(config.getUumsAddress() + USER_MAPPING + "findByUsername"+SSO)
+                .param(AuthoritiesConstants.SSO_API_USERNAME,encryptor.encrypt(loginUser))
+                .param(AuthoritiesConstants.SSO_API_APP_CODE,appcode)
+                .param("username",username)
+                .asBean(JsonResponse.class);
+        if(response==null){
+            log.error("--response对象为空!--");
+            return null;
+        }
+        String json = JacksonUtils.obj2json(response.getData());
+        SimpleUser auth = JacksonUtils.json2obj(json, SimpleUser.class);
+        return auth;
+    }
+
+    /**
+     * 根据用户名查询用户信息(BPS专用)
+     * @param username
+     * @param appcode
+     * @return
+     */
+    public SimpleUser findByUsername(String username,String appcode) throws AuthenticationException {
+        JsonResponse response =  HttpClient.post(config.getUumsAddress() + USER_MAPPING + "findByUsername"+SSO)
+                .param(AuthoritiesConstants.SSO_API_USERNAME,encryptor.encrypt(username))
+                .param(AuthoritiesConstants.SSO_API_APP_CODE,appcode)
+                .param("username",username)
+                .asBean(JsonResponse.class);
+        return simpleUserApiHandle.handRemoteResponse(response, SimpleUser.class);
+//        if(response==null){
+//            log.error("--response对象为空!--");
+//            return null;
+//        }
+//        else {
+//            if(response.getErrcode().equals(JsonResponse.SUCCESS_CODE)){
+//                String json = JacksonUtils.obj2json(response.getData());
+//                SimpleUser auth = JacksonUtils.json2obj(json, SimpleUser.class);
+//                return auth;
+//            }
+//            else {
+//                throw new InternalAuthenticationServiceException(response.getError());
+//            }
+//        }
+    }
+
+    /**
+     * 根据部门以及职位查询所有的人的用户名
+     * @param loginUser
+     * @param orgCode
+     * @param positionIds
+     * @param appcode
+     * @return
+     */
+    public String findUsernameByOrgAndPosition(String loginUser,String orgCode,String positionIds,String appcode) {
+        JsonResponse response =  HttpClient.post(config.getUumsAddress() + USER_MAPPING + "findUsernameByOrgAndPosition"+SSO)
+                .param(AuthoritiesConstants.SSO_API_USERNAME,encryptor.encrypt(loginUser))
+                .param(AuthoritiesConstants.SSO_API_APP_CODE,appcode)
+                .param("orgCode",orgCode)
+                .param("positionIds", positionIds)
+                .asBean(JsonResponse.class);
+        if(response==null){
+            log.error("--response对象为空!--");
+            return null;
+        }
+        return (String ) response.getData();
+    }
+
+
+    /**
+     * 根据群组sid查询用户信息并分页
+     * @param page
+     * @param size
+     * @param direction
+     * @param properties
+     * @param appcode
+     * @param groupSid
+     * @return
+     */
+    public JsonResponse findUserByGroup(int page,  int size, String direction,  String properties,String appcode, String groupSid,Map<String,Object> params ){
+        String username = SecurityUtils.getCurrentUserName();
+        log.debug("Http remote request user by username: {}", username);
+        String paramsJsonStr = null;
+        if (ObjectUtil.isNotEmpty(params)){
+            paramsJsonStr = JacksonUtils.obj2json(params);
+        }
+        JsonResponse response =  HttpClient.textBody(config.getUumsAddress() + USER_MAPPING + "findUserByGroup"+SSO + "?" + AuthoritiesConstants.SSO_API_USERNAME + "=" + encryptor.encrypt(username)
+                + "&" + AuthoritiesConstants.SSO_API_APP_CODE + "=" + appcode +  "&page=" + page + "&size=" + size + "&direction=" + direction + "&properties=" + properties + "&groupId=" + groupSid)
+                .json(paramsJsonStr)
+                .asBean(JsonResponse.class);
+        return response;
+    }
+
+
+    /**
+     * 根据组织orgcode获取用户并分页
+     * @param page
+     * @param size
+     * @param direction
+     * @param properties
+     * @param appcode
+     * @param orgCode
+     * @return
+     */
+    public JsonResponse findUserByOrg(int page,  int size,  String direction,  String properties,String appcode, String orgCode ){
+        String username = SecurityUtils.getCurrentUserName();
+        log.debug("Http remote request user by username: {}", username);
+        JsonResponse response =  HttpClient.post(config.getUumsAddress() + USER_MAPPING + "findUserByOrg"+SSO)
+                .param(AuthoritiesConstants.SSO_API_USERNAME, encryptor.encrypt(username))
+                .param(AuthoritiesConstants.SSO_API_APP_CODE,appcode)
+                .param("page", String.valueOf(page))
+                .param("size", String.valueOf(size))
+                .param("direction", direction)
+                .param("properties", properties)
+                .param("orgCode", orgCode)
+                .asBean(JsonResponse.class);
+        return response;
+    }
+
+
+    /**
+     * 根据职位名获取用户并分页
+     * @param page
+     * @param size
+     * @param direction
+     * @param properties
+     * @param appcode
+     * @param positionName
+     * @return
+     */
+    public JsonResponse findUserByPosition( int page, int size, String direction, String properties,String appcode, String positionName ){
+        String username = SecurityUtils.getCurrentUserName();
+        log.debug("Http remote request user by username: {}", username);
+        JsonResponse response =  HttpClient.post(config.getUumsAddress() + USER_MAPPING + "findUserByPosition"+SSO)
+                .param(AuthoritiesConstants.SSO_API_USERNAME, encryptor.encrypt(username))
+                .param(AuthoritiesConstants.SSO_API_APP_CODE,appcode)
+                .param("page", String.valueOf(page))
+                .param("size", String.valueOf(size))
+                .param("direction", direction)
+                .param("properties", properties)
+                .param("positionName", positionName)
+                .asBean(JsonResponse.class);
+        return response;
+    }
+
+    /**
+     * 根据职位名获取用户不分页
+     * @param appcode
+     * @param positionId
+     * @return
+     */
+    public List<SimpleUser> findUserByPositionNoPage( String appcode, String positionId ){
+        String username = SecurityUtils.getCurrentUserName();
+        log.debug("Http remote request user by username: {}", username);
+        JsonResponse response =  HttpClient.post(config.getUumsAddress() + USER_MAPPING + "findUserByPositionNoPage"+SSO)
+                .param(AuthoritiesConstants.SSO_API_USERNAME, encryptor.encrypt(username))
+                .param(AuthoritiesConstants.SSO_API_APP_CODE,appcode)
+                .param("positionId", positionId)
+                .asBean(JsonResponse.class);
+        if(response==null){
+            log.error("--response对象为空!--");
+            return null;
+        }
+        if(!(response.getData() instanceof ArrayList)){
+            log.error("--uums接口返回的类型不为ArrayList--");
+            return null;
+        }
+        String json = JacksonUtils.obj2json(response.getData());
+        List<SimpleUser> userList=JacksonUtils.json2Type(json, new TypeReference<List<SimpleUser>>(){});
+        return userList;
+    }
+
+    /**
+     * 根据角色id获取用户但不分页
+     * @param roleId
+     * @return
+     */
+    public List<SimpleUser> findUserByRoleNoPage(String roleId ,String appcode){
+        String username = SecurityUtils.getCurrentUserName();
+        log.debug("Http remote request user by username: {}", username);
+        JsonResponse response =  HttpClient.post(config.getUumsAddress() + USER_MAPPING + "findUserByRoleNoPage"+SSO)
+                .param(AuthoritiesConstants.SSO_API_USERNAME, encryptor.encrypt(username))
+                .param(AuthoritiesConstants.SSO_API_APP_CODE,appcode )
+                .param("roleId", String.valueOf(roleId))
+                .asBean(JsonResponse.class);
+        if(response==null){
+            log.error("--response对象为空!--");
+            return null;
+        }
+        if(!(response.getData() instanceof ArrayList)){
+            log.error("--uums接口返回的类型不为ArrayList--");
+            return null;
+        }
+        String json = JacksonUtils.obj2json(response.getData());
+        List<SimpleUser> userList=JacksonUtils.json2Type(json, new TypeReference<List<SimpleUser>>(){});
+        return userList;
+    }
+
+    /**
+     * 根据角色id获取用户并分页
+     * @param page
+     * @param size
+     * @param direction
+     * @param properties
+     * @param appcode
+     * @param roleId
+     * @return
+     */
+    public JsonResponse findUserByRole(int page, int size, String direction, String properties,String appcode,String roleId ){
+        String username = SecurityUtils.getCurrentUserName();
+        log.debug("Http remote request user by username: {}", username);
+        JsonResponse response =  HttpClient.post(config.getUumsAddress() + USER_MAPPING + "findUserByRole"+SSO)
+                .param(AuthoritiesConstants.SSO_API_USERNAME, encryptor.encrypt(username))
+                .param(AuthoritiesConstants.SSO_API_APP_CODE,appcode)
+                .param("page", String.valueOf(page))
+                .param("size", String.valueOf(size))
+                .param("direction", direction)
+                .param("properties", properties)
+                .param("roleId", String.valueOf(roleId))
+                .asBean(JsonResponse.class);
+        return response;
+    }
+
+    /**
+     * 根据过滤条件获取决策下的用户
+     * @param appcode
+     * @param sysAppDecisionmap
+     * @return
+     */
+    public JsonResponse findUserByDecisionNoPage(String appcode,Map sysAppDecisionmap){
+        String username = SecurityUtils.getCurrentUserName();
+        log.debug("Http remote request user by username: {}", username);
+        return findUser(appcode,username,sysAppDecisionmap);
+    }
+
+    /**
+     * 根据过滤条件获取决策下的用户，无session
+     * @param appcode
+     * @param sysAppDecisionmap
+     * @return
+     */
+    public JsonResponse findUserByDecisionNoPageNoSession(String appcode,Map sysAppDecisionmap){
+        String username =(String )sysAppDecisionmap.get("loginUser");
+        log.debug("Http remote request user by username: {}", username);
+        return findUser(appcode,username,sysAppDecisionmap);
+    }
+
+    /**
+     * 根据过滤条件获取决策下的用户
+     * @param appcode
+     * @param username
+     * @param sysAppDecisionmap
+     * @return
+     */
+    private JsonResponse findUser(String appcode,String username,Map sysAppDecisionmap){
+        String json0=JacksonUtils.obj2json(sysAppDecisionmap);
+        String username1=encryptor.encrypt(username);
+        String username2=username1.replace("+","%2B");
+        JsonResponse response= HttpClient.textBody(config.getUumsAddress() + USER_MAPPING + "findUserByDecisionNoPage"+SSO+"?loginuser="+username2+"&appcode="+appcode
+                +"&username="+username)
+                .json( json0 )
+                .asBean(JsonResponse.class);
+        return response;
+    }
+
+    /**
+     * 根据过滤条件获取决策下的分组用户
+     * @param appcode
+     * @param sysAppDecisionmap
+     * @return
+     */
+    public JsonResponse findUserByDecisionNoPageGrouping(String appcode,Map sysAppDecisionmap){
+        String username = SecurityUtils.getCurrentUserName();
+        log.debug("Http remote request user by username: {}", username);
+        return findUserGrouping(appcode,username,sysAppDecisionmap);
+    }
+
+    /**
+     * 根据过滤条件获取决策下的分组用户，无session
+     * @param appcode
+     * @param sysAppDecisionmap
+     * @return
+     */
+    public JsonResponse findUserByDecisionNoPageNoSessionGrouping(String appcode,Map sysAppDecisionmap){
+        String username =(String )sysAppDecisionmap.get("loginUser");
+        log.debug("Http remote request user by username: {}", username);
+        return findUserGrouping(appcode,username,sysAppDecisionmap);
+    }
+
+    /**
+     * 根据过滤条件获取决策下的分组用户
+     * @param appcode
+     * @param username
+     * @param sysAppDecisionmap
+     * @return
+     */
+    private JsonResponse findUserGrouping(String appcode,String username,Map sysAppDecisionmap){
+        String json0=JacksonUtils.obj2json(sysAppDecisionmap);
+        String username1=encryptor.encrypt(username);
+        String username2=username1.replace("+","%2B");
+        JsonResponse response= HttpClient.textBody(config.getUumsAddress() + USER_MAPPING + "findUserByDecisionNoPage"+SSO+"?loginuser="+username2+"&appcode="+appcode
+                +"&username="+username)
+                .json( json0 )
+                .asBean(JsonResponse.class);
+       return response;
+    }
+
+    /**
+     * 根据用户返回用户以及用户的的组织树
+     * @param appcode
+     * @param username
+     * @return
+     */
+    public JsonResponse findUserByUsernameNoPage(String appcode,String username){
+        String loginUser = SecurityUtils.getCurrentUserName();
+        log.debug("Http remote request user by username: {}", loginUser);
+        return findUserByUsername(appcode, loginUser, username);
+    }
+
+    /**
+     * 根据用户返回用户以及用户的的组织树，无session
+     * @param appcode
+     * @param username
+     * @return
+     */
+    public JsonResponse findUserByUsernameNoPageNoSession(String appcode,String loginUser,String username){
+        log.debug("Http remote request user by username: {}", loginUser);
+        return findUserByUsername(appcode, loginUser, username);
+    }
+
+    /**
+     * 返回用户以及用户的的组织树
+     * @param appcode
+     * @param username
+     * @return
+     */
+    private JsonResponse findUserByUsername(String appcode,String loginUser,String username){
+        JsonResponse response= HttpClient.post(config.getUumsAddress() + USER_MAPPING + "findUserByUsernameNoPage"+SSO)
+                .param(AuthoritiesConstants.SSO_API_USERNAME, encryptor.encrypt(loginUser))
+                .param(AuthoritiesConstants.SSO_API_APP_CODE,appcode)
+                .param("username",username)
+                .asBean(JsonResponse.class);
+        return response;
+    }
+
+    /**
+     * 一层层去查询全部组织和人
+     * @param appcode
+     * @param orgCode
+     * @return
+     */
+    public List<UserOrgTree> findOneStep(String appcode,String orgCode,Map<String,Object> extraValueMap, String currentUserCode){
+        String loginUser;
+        if(StringUtils.isEmpty(currentUserCode)) {
+            loginUser = SecurityUtils.getCurrentUserName();
+        }
+        else{
+            loginUser = encryptor.decrypt(currentUserCode);
+        }
+        log.debug("Http remote request user by username: {}", loginUser);
+        String json0=JacksonUtils.obj2json(extraValueMap);
+        String username1=encryptor.encrypt(loginUser);
+        String username2=username1.replace("+","%2B");
+        JsonResponse response = new JsonResponse(  );
+        if(StringUtils.isEmpty( orgCode )){
+             response = HttpClient.textBody(config.getUumsAddress() + USER_MAPPING + "findOneStep"+SSO+"?loginuser="+username2+"&appcode="+appcode )
+                    .json( json0 )
+                    .asBean(JsonResponse.class);
+        }else{
+             response = HttpClient.textBody(config.getUumsAddress() + USER_MAPPING + "findOneStep"+SSO+"?loginuser="+username2+"&appcode="+appcode
+                    +"&orgCode="+orgCode)
+                    .json( json0 )
+                    .asBean(JsonResponse.class);
+        }
+        if(response==null){
+            log.error("--response对象为空!--");
+            return null;
+        }
+        if(!(response.getData() instanceof ArrayList)){
+            log.error("--uums接口返回的类型不为ArrayList--");
+            return null;
+        }
+        String json = JacksonUtils.obj2json(response.getData());
+        List<UserOrgTree> userList=JacksonUtils.json2Type(json, new TypeReference<List<UserOrgTree>>(){});
+        return userList;
+    }
+
+    /**
+     * 根据用户中文姓名以及主数据首先移动号码模糊查询并分页
+     * @param appcode
+     * @param page
+     * @param size
+     * @param direction
+     * @param properties
+     * @param truename
+     * @param preferredMobile
+     * @return
+     */
+    public JsonResponse findRoleNameIsARoleDim(int page,int size,String direction,String properties,String appcode,String truename,String username, String preferredMobile,
+                                                                          String employeeNumber,String email,String orgCode) {
+        String loginUser = SecurityUtils.getCurrentUserName();
+        log.debug("Http remote request user by username: {}", loginUser);
+        Map<String, Object> requestMap = Dict.create()
+                .set("truename",truename)
+                .set("preferredMobile",preferredMobile)
+                .set("employeeNumber",employeeNumber)
+                .set("email",email)
+                .set("orgCode",orgCode)
+                .set("username",username);
+        JsonResponse response =  HttpClient.textBody(config.getUumsAddress() + USER_MAPPING + "findRoleNameIsARoleDim"+SSO+"?loginuser="+encryptor.encrypt(loginUser)+"&appcode="+config.getAppcode()
+                        +"&page="+page+"&size="+size+"&direction="+direction+"&properties="+properties)
+                .json(JacksonUtils.obj2json(requestMap))
+                .asBean(JsonResponse.class);
+        return response;
+    }
+
+    /**
+     * 检测用户是否有app的权限
+     * 应用向UUMS发送单点请求时使用
+     * @param username
+     * @param appcode
+     * @return
+     */
+    public Boolean checkUserAccessApp(String username,String appcode) {
+       return checkUserAccessAppNoramal(SecurityUtils.getCurrentUserName(),username,appcode);
+    }
+
+    /**
+     * 检测用户是否有app的权限。当前应用无session时使用，如portal。
+     * 门户Portal向应用发送单点请求，应用再向UUMS发送单点请求时使用
+     * @param username
+     * @param appcode
+     * @return
+     */
+    public Boolean checkUserAccessAppNoSession(String username,String appcode) {
+        return checkUserAccessAppNoramal(username,username,appcode);
+    }
+
+    private Boolean checkUserAccessAppNoramal(String loginUser, String username, String appcode){
+        log.debug("Http remote request user by username: {}", loginUser);
+        JsonResponse response= HttpClient.post(config.getUumsAddress() + USER_MAPPING + "checkUserAccessApp"+SSO)
+                .param(AuthoritiesConstants.SSO_API_USERNAME, encryptor.encrypt(loginUser))
+                .param(AuthoritiesConstants.SSO_API_APP_CODE,appcode)
+                .param("username", username)
+                .param("appCode", appcode)
+                .asBean(JsonResponse.class);
+        if(response==null){
+            log.error("--response对象为空!--");
+            return null;
+        }
+        String json = JacksonUtils.obj2json(response.getData());
+        Boolean auth = JacksonUtils.json2obj(json, Boolean.class);
+        return auth;
+    }
+
+    /**
+     * 查询某个人在某一应用下的全部权限。普通应用使用
+     * 应用向UUMS发送单点请求时使用
+     * @param appcode
+     * @param username
+     * @return
+     */
+    public Set<SimplePermission> findPermissionByAppUser(String username, String appcode) {
+        return findPermissionByAppUserNormal(SecurityUtils.getCurrentUserName(), username, appcode);
+    }
+
+    /**
+     * 查询某个人在某一应用下的全部权限。当前应用无session时使用，如portal
+     * 门户Portal向应用发送单点请求，应用再向UUMS发送单点请求时使用
+     * @param username
+     * @param appcode
+     * @return
+     */
+    public Set<SimplePermission> findPermissionByAppUserNoSession( String username, String appcode) {
+        String usernameNew = "";
+        if( !StringUtils.isEmpty( username ) ){
+            int strNumber = username.length();
+            if(strNumber>50){
+                usernameNew = encryptor.decrypt(username);
+            }else{
+                usernameNew = username;
+            }
+        }
+        return findPermissionByAppUserNormal(usernameNew, usernameNew, appcode);
+    }
+
+    private Set<SimplePermission> findPermissionByAppUserNormal(String loginUser, String username, String appcode){
+        log.debug("Http remote request user by username: {}", loginUser);
+        JsonResponse response =  HttpClient.post(config.getUumsAddress() + USER_MAPPING + "findPermissionByAppUser"+SSO)
+                .param(AuthoritiesConstants.SSO_API_USERNAME, encryptor.encrypt(loginUser))
+                .param(AuthoritiesConstants.SSO_API_APP_CODE,appcode)
+                .param("username",username)
+                .param( "appCode",appcode )
+                .asBean(JsonResponse.class);
+        if(response==null){
+            log.error("--response对象为空!--");
+            return null;
+        }
+        if(!(response.getData() instanceof List)){
+            log.error("--uums接口返回的类型不为List--");
+            return null;
+        }
+        String json = JacksonUtils.obj2json(response.getData());
+        Set<SimplePermission> permissions=JacksonUtils.json2Type(json, new TypeReference<Set<SimplePermission>>(){});
+        return permissions;
+    }
+
+    /**
+     * 根据关键字查询用户身份信息，当前支持如下：
+     * 登录名     username
+     * 人员编号   employeeNumber
+     * 手机号码   preferredMobile
+     * 邮箱       email
+     * 可存微信openid openid
+     * @param keyword
+     * @param keytype
+     * @param appcode
+     * @return
+     */
+    public SimpleUser findByKey(String keyword,IAuthService.KeyType keytype,String appcode) {
+        JsonResponse response =  HttpClient.post(config.getUumsAddress() + USER_MAPPING + "findByKey"+SSO)
+                .param(AuthoritiesConstants.SSO_API_KEYWORD, encryptor.encrypt(keyword))
+                .param(AuthoritiesConstants.SSO_API_KEYTYPE, keytype.name())
+                .param(AuthoritiesConstants.SSO_API_APP_CODE, appcode)
+                .asBean(JsonResponse.class);
+        if(response==null){
+            log.error("--response对象为空!--");
+            return null;
+        }
+        String json = JacksonUtils.obj2json(response.getData());
+        SimpleUser auth = JacksonUtils.json2obj(json, SimpleUser.class);
+        return auth;
+    }
+
+
+    /**
+     * 根据群组sid查询OA账号，真实姓名及该用户的职位id，职位排序和职位名以及所在组织的displayName
+     * @param appcode
+     * @param groupSid
+     * @return
+     */
+    public Set<Map<String,Object>> findUserInfoByGroupSidNoPage(String appcode,String groupSid) {
+        String loginUser = SecurityUtils.getCurrentUserName();
+        log.debug("Http remote request user by username: {}", loginUser);
+        JsonResponse response =  HttpClient.post(config.getUumsAddress() + USER_MAPPING + "findUserInfoByGroupSidNoPage"+SSO)
+                .param(AuthoritiesConstants.SSO_API_USERNAME, encryptor.encrypt(loginUser))
+                .param(AuthoritiesConstants.SSO_API_APP_CODE,appcode)
+                .param("groupSid",groupSid)
+                .asBean(JsonResponse.class);
+        if(response==null){
+            log.error("--response对象为空!--");
+            return null;
+        }
+        String json = JacksonUtils.obj2json(response.getData());
+        Set<Map<String,Object>> auth = JacksonUtils.json2Type(json, new TypeReference<Set<Map<String,Object>>>(){});
+        return auth;
+    }
+
+    /**
+     * 修改别人的密码
+     * @param username 别人的用户名
+     * @param rsaPassword 经过RSA加密的密码
+     * @param appcode
+     * @return
+     */
+    public JsonResponse changeUserPassword(String username, String rsaPassword, String appcode) {
+        String loginUser = SecurityUtils.getCurrentUserName();
+        log.debug("Http remote request user by username: {}", loginUser);
+        JsonResponse response= HttpClient.post(config.getUumsAddress() + USER_MAPPING + "changeUserPassword"+SSO)
+                .param(AuthoritiesConstants.SSO_API_USERNAME, encryptor.encrypt(loginUser))
+                .param(AuthoritiesConstants.SSO_API_APP_CODE,appcode)
+                .param("username",username)
+                .param("rsaPassword",rsaPassword)
+                .asBean(JsonResponse.class);
+        return response;
+    }
+
+    /**
+     * 修改我的密码
+     * @param oldRsaPassword 经过RSA加密的原始密码
+     * @param newRsaPassword 经过RSA加密的新密码
+     * @param appcode
+     * @return
+     */
+    public JsonResponse changeMyPassword(String oldRsaPassword, String newRsaPassword, String appcode) {
+        String loginUser = SecurityUtils.getCurrentUserName();
+        log.debug("Http remote request user by username: {}", loginUser);
+        JsonResponse response= HttpClient.post(config.getUumsAddress() + USER_MAPPING + "changeMyPassword"+SSO)
+                .param(AuthoritiesConstants.SSO_API_USERNAME, encryptor.encrypt(loginUser))
+                .param(AuthoritiesConstants.SSO_API_APP_CODE,appcode)
+                .param("oldRsaPassword",oldRsaPassword)
+                .param("newRsaPassword",newRsaPassword)
+                .asBean(JsonResponse.class);
+        return response;
+    }
+
+    /**
+     * 获取一个群组下的所有人，并且对人员进行排序，排序之后获取人员的全部信息。每个人只会给一个最大的组织和职位。
+     * @param groupId
+     * @param appcode
+     * @return
+     */
+    public JsonResponse findUserByGroupSort(String groupId, String appcode) {
+        String loginUser = SecurityUtils.getCurrentUserName();
+        log.debug("Http remote request user by username: {}", loginUser);
+        JsonResponse response= HttpClient.post(config.getUumsAddress() + USER_MAPPING + "findUserByGroupSort"+SSO)
+                .param(AuthoritiesConstants.SSO_API_USERNAME, encryptor.encrypt(loginUser))
+                .param(AuthoritiesConstants.SSO_API_APP_CODE,appcode)
+                .param("groupId",groupId)
+                .asBean(JsonResponse.class);
+        return response;
+    }
+
+    /**
+     * 获取某一个组织下的组织和人
+     * @param orgCode
+     * @param appcode
+     * @return
+     */
+    public JsonResponse findAllInfosUnderOrg(String orgCode, String appcode) {
+        String loginUser = SecurityUtils.getCurrentUserName();
+        log.debug("Http remote request user by username: {}", loginUser);
+        JsonResponse response= HttpClient.post(config.getUumsAddress() + USER_MAPPING + "findAllInfosUnderOrg"+SSO)
+                .param(AuthoritiesConstants.SSO_API_USERNAME, encryptor.encrypt(loginUser))
+                .param(AuthoritiesConstants.SSO_API_APP_CODE,appcode)
+                .param("orgCode",orgCode)
+                .asBean(JsonResponse.class);
+        return response;
+    }
+
+    /**
+     * 获取指定组织下的所有组织和人，返回决策项出人结构类型
+     * @param orgCodes   逗号分隔
+     * @param appcode
+     * @return
+     */
+    public JsonResponse findAllOrgUserByOrgs(String appcode,Map sysAppDecisionmap) {
+        String loginUser = SecurityUtils.getCurrentUserName();
+        log.debug("Http remote request user by username: {}", loginUser);
+        String json0 = JacksonUtils.obj2json(sysAppDecisionmap);
+        String username1 = this.encryptor.encrypt(loginUser);
+        String username2 = username1.replace("+", "%2B");
+        JsonResponse response = HttpClient.textBody(config.getUumsAddress() + USER_MAPPING + "findAllOrgUserByOrgs"+SSO+"?loginuser="+username2+"&appcode="+appcode)
+                .json( json0 )
+                .asBean(JsonResponse.class);
+        return response;
+    }
+
+    /**
+     * 获取某一个组织下的全部人，包括下级组织的人
+     * @param orgCode
+     * @param appcode
+     * @return
+     */
+    public Set<Map<String,Object>> findAllUserByOrgCode(String orgCode, String appcode) {
+        String loginUser = SecurityUtils.getCurrentUserName();
+        log.debug("Http remote request user by username: {}", loginUser);
+        JsonResponse response= HttpClient.post(config.getUumsAddress() + USER_MAPPING + "findAllUserByOrgCode"+SSO)
+                .param(AuthoritiesConstants.SSO_API_USERNAME, encryptor.encrypt(loginUser))
+                .param(AuthoritiesConstants.SSO_API_APP_CODE,appcode)
+                .param("orgCode",orgCode)
+                .asBean(JsonResponse.class);
+        if(response==null){
+            log.error("--response对象为空!--");
+            return null;
+        }
+        if(!(response.getData() instanceof List)){
+            log.error("--uums接口返回的类型不为List--");
+            return null;
+        }
+        String json = JacksonUtils.obj2json(response.getData());
+        Set<Map<String,Object>> users=JacksonUtils.json2Type(json, new TypeReference<Set<Map<String,Object>>>(){});
+        return users;
+    }
+
+    /**
+     * 获取某一个组织下的组织和人，合在一起
+     * @param orgCode
+     * @param appcode
+     * @return
+     */
+    public JsonResponse findAllInfosUnderOrgTogether(String orgCode, String appcode) {
+        String loginUser = SecurityUtils.getCurrentUserName();
+        log.debug("Http remote request user by username: {}", loginUser);
+        JsonResponse response= HttpClient.post(config.getUumsAddress() + USER_MAPPING + "findAllInfosUnderOrgTogether"+SSO)
+                .param(AuthoritiesConstants.SSO_API_USERNAME, encryptor.encrypt(loginUser))
+                .param(AuthoritiesConstants.SSO_API_APP_CODE,appcode)
+                .param("orgCode",orgCode)
+                .asBean(JsonResponse.class);
+        return response;
+    }
+
+    /**
+     * 根据组织（精确）以及用户oa账号、用户名、手机号（模糊）获取用户并分页
+     * @param page
+     * @param size
+     * @param direction
+     * @param properties
+     * @param appcode
+     * @param orgCode
+     * @param searchFields
+     * @return
+     */
+    public JsonResponse findUserOrgDim(int page,  int size, String direction,  String properties,String appcode, String orgCode,String searchFields ){
+        String loginUser = SecurityUtils.getCurrentUserName();
+        log.debug("Http remote request user by username: {}", loginUser);
+        JsonResponse response =  HttpClient.post(config.getUumsAddress() + USER_MAPPING + "findUserOrgDim"+SSO)
+                .param(AuthoritiesConstants.SSO_API_USERNAME, encryptor.encrypt(loginUser))
+                .param(AuthoritiesConstants.SSO_API_APP_CODE,appcode)
+                .param("page", String.valueOf(page))
+                .param("size", String.valueOf(size))
+                .param("direction", direction)
+                .param("properties", properties)
+                .param("orgCode", orgCode)
+                .param("searchFields", searchFields)
+                .asBean(JsonResponse.class);
+        return response;
+    }
+
+    /**
+     * 半展出人所在的组织树，除了人所在的组织是展开的，其他都是闭合的
+     * @param mapParam
+     * @param appcode
+     * @return
+     */
+    public List<UserOrgTree> findUserTreeBz(Map<String,Object> mapParam, String appcode) {
+        String loginUser = SecurityUtils.getCurrentUserName();
+        log.debug("Http remote request user by username: {}", loginUser);
+        String json0=JacksonUtils.obj2json(mapParam);
+        String username1=encryptor.encrypt(loginUser);
+        String username2=username1.replace("+","%2B");
+        JsonResponse response= HttpClient.textBody(config.getUumsAddress() + USER_MAPPING + "findUserTreeBz"+SSO+"?loginuser="+username2+"&appcode="+appcode )
+                .json( json0 )
+                .asBean(JsonResponse.class);
+        return userOrgTreeApiHandle.handRemoteTypeReferenceResponse(response, new TypeReference<List<UserOrgTree>>(){});
+    }
+
+    /**
+     * 组织查人之根据orgCode获取组织下的人,包含这些人的组织、职务、角色等扩展属性，分页
+     * @param mapParam
+     * @param appcode
+     * @return
+     */
+    public Map<String,Object> findUserIncludeExtensionByOrgCode(int page,  int size, String direction,  String properties,Map<String,Object> mapParam, String appcode) {
+        String loginUser = SecurityUtils.getCurrentUserName();
+        log.debug("Http remote request user by username: {}", loginUser);
+        String json0=JacksonUtils.obj2json(mapParam);
+        String username1=encryptor.encrypt(loginUser);
+        String username2=username1.replace("+","%2B");
+        JsonResponse response= HttpClient.textBody(config.getUumsAddress() + USER_MAPPING + "findUserIncludeExtensionByOrgCode/paging"+SSO+"?loginuser="+username2+"&appcode="+appcode
+                +"&page="+page+"&size="+size+"&direction="+direction+"&properties="+properties)
+                .json( json0 )
+                .asBean(JsonResponse.class);
+        return mapUserApiHandlemapUserApiHandle.handRemoteTypeReferenceResponse(response, new TypeReference<Map<String,Object>>(){});
+    }
+
+    /**
+     * 获取管理层
+     * @return
+     */
+    public JsonResponse findLeaderShip (String appcode ) {
+        String loginUser = SecurityUtils.getCurrentUserName();
+        log.debug("Http remote request user by username: {}", loginUser);
+        JsonResponse response= HttpClient.post(config.getUumsAddress() + USER_MAPPING +"findLeaderShip" + SSO)
+                .param( AuthoritiesConstants.SSO_API_USERNAME, encryptor.encrypt(loginUser))
+                .param(AuthoritiesConstants.SSO_API_APP_CODE, appcode)
+                .asBean(JsonResponse.class);
+        return response;
+    }
+
+    /**
+     * 根据corpId和userType出人员
+     * @param mapParam
+     * @param appcode
+     * @return
+     */
+    public Set<SimpleUser> findUserFromCorpType(Map<String,Object> mapParam, String appcode) {
+        String loginUser = SecurityUtils.getCurrentUserName();
+        log.debug("Http remote request user by username: {}", loginUser);
+        String json0=JacksonUtils.obj2json(mapParam);
+        String username1=encryptor.encrypt(loginUser);
+        String username2=username1.replace("+","%2B");
+        JsonResponse response= HttpClient.textBody(config.getUumsAddress() + USER_MAPPING + "findUserFromCorpType"+SSO+"?loginuser="+username2+"&appcode="+appcode )
+                .json( json0 )
+                .asBean(JsonResponse.class);
+        return setSimpleUserApiHandle.handRemoteTypeReferenceResponse(response, new TypeReference<Set<SimpleUser>>(){});
+    }
+
+    /**
+     * 根据权限id查询此权限下的用户并分页
+     * @param page
+     * @param size
+     * @param id
+     * @param appcode
+     * @return
+     */
+    public JsonResponse findUserFromPerId( int page, int size, String id, String appcode) {
+        String loginUser = SecurityUtils.getCurrentUserName();
+        log.debug("Http remote request user by username: {}", loginUser);
+        JsonResponse response =  HttpClient.post(config.getUumsAddress() + USER_MAPPING + "findUserFromPerId"+SSO)
+                .param(AuthoritiesConstants.SSO_API_USERNAME, encryptor.encrypt(loginUser))
+                .param(AuthoritiesConstants.SSO_API_APP_CODE,appcode)
+                .param("page", String.valueOf(page))
+                .param("size", String.valueOf(size))
+                .param("id", id)
+                .asBean(JsonResponse.class);
+        return response;
+    }
+
+    /**
+     * 获取分公司管理层和省公司部门领导及管理层
+     * @param appcode
+     * @return
+     */
+    public Set<String> findThLeUser(  String appcode) {
+        String username = SecurityUtils.getCurrentUserName();
+        if(StringUtils.isEmpty( username )){
+            username = ApplicationConstants.ADMINISTRATOR;
+        }
+        log.debug("Http remote request user by username: {}", username);
+        JsonResponse response =  HttpClient.post(config.getUumsAddress() + USER_MAPPING + "findThLeUser"+SSO)
+                .param(AuthoritiesConstants.SSO_API_USERNAME, encryptor.encrypt(username))
+                .param(AuthoritiesConstants.SSO_API_APP_CODE,appcode)
+                .asBean(JsonResponse.class);
+        return setStrApiHandle.handRemoteTypeReferenceResponse(response, new TypeReference<Set<String>>(){});
+    }
+
+    /**
+     * 模糊查询出人所在的组织树
+     * @param appcode
+     * @return
+     */
+    public Set<UserOrgTree> findDimUserTree(  Map<String,Object> mapParam, String appcode) {
+        String loginUser = SecurityUtils.getCurrentUserName();
+        log.debug("Http remote request user by username: {}", loginUser);
+        String json0=JacksonUtils.obj2json(mapParam);
+        String username1=encryptor.encrypt(loginUser);
+        String username2=username1.replace("+","%2B");
+        JsonResponse response= HttpClient.textBody(config.getUumsAddress() + USER_MAPPING + "findDimUserTree"+SSO+"?loginuser="+username2+"&appcode="+appcode )
+                .json( json0 )
+                .asBean(JsonResponse.class);
+        return userOrgTreeSetApiHandle.handRemoteTypeReferenceResponse(response, new TypeReference<Set<UserOrgTree>>(){});
+    }
+
+    /**
+     * 新增组织下的用户通用
+     * @param mapParam
+     * @param appcode
+     * @return
+     */
+    public JsonResponse insertUserInOrgNormal(  Map<String,Object> mapParam, String appcode) {
+        String loginUser = SecurityUtils.getCurrentUserName();
+        log.debug("Http remote request user by username: {}", loginUser);
+        String json0=JacksonUtils.obj2json(mapParam);
+        String username1=encryptor.encrypt(loginUser);
+        String username2=username1.replace("+","%2B");
+        JsonResponse response= HttpClient.textBody(config.getUumsAddress() + USER_MAPPING + "insertUserInOrgNormal"+SSO+"?loginuser="+username2+"&appcode="+appcode )
+                .json( json0 )
+                .asBean(JsonResponse.class);
+        return response;
+    }
+
+    /**
+     * 修改组织下的用户通用
+     * @param mapParam
+     * @param appcode
+     * @return
+     */
+    public JsonResponse updateUserInOrgNormal(  Map<String,Object> mapParam, String appcode) {
+        String loginUser = SecurityUtils.getCurrentUserName();
+        log.debug("Http remote request user by username: {}", loginUser);
+        String json0=JacksonUtils.obj2json(mapParam);
+        String username1=encryptor.encrypt(loginUser);
+        String username2=username1.replace("+","%2B");
+        JsonResponse response= HttpClient.textBody(config.getUumsAddress() + USER_MAPPING + "updateUserInOrgNormal"+SSO+"?loginuser="+username2+"&appcode="+appcode )
+                .json( json0 )
+                .asBean(JsonResponse.class);
+        return response;
+    }
+
+    /**
+     * 删除组织下的用户通用
+     * @param mapParam
+     * @param appcode
+     * @return
+     */
+    public JsonResponse deleteUserInOrgNormal(  Map<String,Object> mapParam, String appcode) {
+        String loginUser = SecurityUtils.getCurrentUserName();
+        log.debug("Http remote request user by username: {}", loginUser);
+        String json0=JacksonUtils.obj2json(mapParam);
+        String username1=encryptor.encrypt(loginUser);
+        String username2=username1.replace("+","%2B");
+        JsonResponse response= HttpClient.textBody(config.getUumsAddress() + USER_MAPPING + "deleteUserInOrgNormal"+SSO+"?loginuser="+username2+"&appcode="+appcode )
+                .json( json0 )
+                .asBean(JsonResponse.class);
+        return response;
+    }
+
+    /**
+     * 获取所有人信息
+     * @param appcode
+     * @return
+     */
+    public JsonResponse findAllUsersNoPage(String appcode){
+        String username1 = encryptor.encrypt(SSO_AUTH_HADMIN);
+        String username2 = username1.replace("+","%2B");
+        SimpleUser simpleUser1 = new SimpleUser();
+        String json0 = JacksonUtils.obj2json(simpleUser1);
+        JsonResponse response= HttpClient.textBody(config.getUumsAddress() + USER_MAPPING + "findAllNoPage" + SSO + "?loginuser="+username2+"&appcode="+appcode )
+                .json( json0 )
+                .asBean(JsonResponse.class);
+        if(response == null){
+            log.error("--response对象为空!--");
+            return null;
+        }else{
+            //循环放入缓存
+            String json = JacksonUtils.obj2json(response.getData());
+            Iterable<SimpleUser> simpleUsers = JacksonUtils.json2Type(json, new TypeReference<Iterable<SimpleUser>>() {});
+            simpleUsers.forEach(simpleUser -> {
+                //log.warn("UUMS查询到的人员数据为:【{}】",JacksonUtils.obj2json(simpleUser));
+                if (simpleUser != null){
+                    IUser user = authUserCacheService.loadCacheUser(simpleUser.getUsername());
+                    if (user == null){
+                        authUserCacheService.saveOrUpdateCacheUser(simpleUser);
+                    }
+                }
+            });
+        }
+        return response;
+    }
+
+    /**
+     * 外部应用获取某一段时间内的主数据用户的变更数据
+     * @param startTime
+     * @param endTime
+     * @return
+     */
+    public Map<String,Object> CleanUserCacheByFindTimUserInfos(String startTime, String endTime) {
+        ReqHeader<Object> reqHeader = ReqHeader.builder().clientCode(config.getAppcode()).clientIp(appRuntimeMaster.getMyHost())
+                .clientName(SSO_AUTH_HADMIN).clientLinkman(SSO_AUTH_HADMIN).clientLinkTel(SSO_AUTH_HADMIN).clientLinkEmail(SSO_AUTH_HADMIN)
+                .customLinkman(SSO_AUTH_HADMIN).customLinkTel(SSO_AUTH_HADMIN).customLinkEmail(SSO_AUTH_HADMIN).requestTime(new Date())
+                .data(ImmutableMap.of("startTime", startTime, "endTime", endTime)).build();
+        JsonResponse response= HttpClient.textBody(config.getUumsAddress() + USER_MAPPING + "/anonymous/findTimUserInfos")
+                .json( JacksonUtils.obj2json(reqHeader) )
+                .asBean(JsonResponse.class);
+        Map<String,Object>  findTimUserInfosMap = mapUserApiHandlemapUserApiHandle.handRemoteTypeReferenceResponse(response, new TypeReference<Map<String,Object>>(){});
+
+        //返回结果前，清理用户缓存
+        if(null != findTimUserInfosMap){
+            Object details = findTimUserInfosMap.get(UUMS_USER_DETAILS);
+            if(null != details){
+                List detailList = (List)details;
+                for(int i=0; i<detailList.size(); i++) {
+                    //不使用对象，避免创建大量对象，增加JVM堆内存
+//                        ChangeUserLog userLog = JacksonUtils.json2Type(JacksonUtils.obj2json(((List<?>) details).get(i)), new TypeReference<ChangeUserLog>() {});
+//                        log.info("即将清理用户信息【{}】", userLog);
+//                        authUserCacheService.removeCacheUserAllInformaitions(userLog.getUsername());
+//                        RedisUtil.mulDeleteGlobal(userLog.getUsername());
+
+                    //使用原始的MAP处理
+                    Map<String, String> userLogMap = (Map<String, String>)((List<?>) details).get(i);
+                    log.info("即将清理用户信息【{}】", userLogMap);
+                    Object username = userLogMap.get(UUMS_USER_USERNAME);
+                    Assert.notNull(username, "用户账号信息不能为空！");
+                    authUserCacheService.removeCacheUserAllInformaitions(username.toString());
+                    RedisUtil.mulDeleteGlobal(username.toString());
+                }
+            }
+        }
+
+        return null == findTimUserInfosMap ? Maps.newHashMap() : findTimUserInfosMap ;
+    }
+
+    /**
+     * 根据菜单ID查询被授权的人员
+     * @param permissionId
+     * @return
+     */
+    public JsonResponse queryUserByPermissionId(String permissionId) {
+        String username = SecurityUtils.getCurrentUserName();
+        log.debug("Http remote request user by username: {}", username);
+        String username1 = encryptor.encrypt(username);
+        JsonResponse response =  HttpClient.post(config.getUumsAddress() + USER_MAPPING + "queryUserByPermissionId"+SSO+"?loginuser="+username1+"&appcode="+config.getAppcode())
+                .param("permissionId",permissionId)
+                .asBean(JsonResponse.class);
+        if(response == null){
+            log.debug("--response对象为空!--");
+            return null;
+        }
+        return response;
+    }
+}
+

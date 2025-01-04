@@ -3,15 +3,13 @@
  */
 package com.simbest.cloud.cores.sys.model;
 
-
-import com.simbest.cloud.cores.base.annotations.EntityIdPrefix;
+import com.simbest.cloud.cores.annotations.EntityIdPrefix;
 import com.simbest.cloud.cores.base.model.LogicModel;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
 
-
+import jakarta.persistence.*;
 
 /**
  * 用途：数据字典值
@@ -39,59 +37,59 @@ public class SysDictValue extends LogicModel {
     @Id
     @Column(name = "id", length = 40)
     @GeneratedValue(generator = "snowFlakeId")
-    @GenericGenerator(name = "snowFlakeId", strategy = "com.simbest.cloud.cores.util.distribution.id.SnowflakeId")
+    @GenericGenerator(name = "snowFlakeId", strategy = "com.simbest.boot.util.distribution.id.SnowflakeId")
     @EntityIdPrefix(prefix = "V") //主键前缀，此为可选项注解
     private String id;
 
-    @Schema(name = "字典值名称")
+    @Schema(description = "字典值名称")
     @Column(nullable = false, length = 200)
     private String name;
 
-    @Schema(name = "字典值")
+    @Schema(description = "字典值")
     @Column(nullable = false, length = 200)
     private String value;
 
-    @Schema(name = "字典值描述")
+    @Schema(description = "字典值描述")
     @Column
     private String description;
 
-    @Schema(name = "字典值排序")
+    @Schema(description = "字典值排序")
     @Column
     private Integer displayOrder;
 
-    @Schema(name = "父亲节点外键")
+    @Schema(description = "父亲节点外键")
     @Column
     private String parentId;
 
-    @Schema(name = "字典类型")
+    @Schema(description = "字典类型")
     @Column(nullable = false)
     private String dictType;
 
-    @Schema(name = "字典值类型")
+    @Schema(description = "字典值类型")
     @Column
     private String valueType;
 
-    @Schema(name = "是否默认选择")
+    @Schema(description = "是否默认选择")
     @Column
     private Boolean isDefault;
 
-    @Schema(name = "流程类型标识")
+    @Schema(description = "流程类型标识")
     @Column(length = 50)
     private String flag;
 
-    @Schema(name = "扩展字段1")
+    @Schema(description = "扩展字段1")
     @Column(length = 200)
     private String spare1;
 
-    @Schema(name = "扩展字段2")
+    @Schema(description = "扩展字段2")
     @Column(length = 200)
     private String spare2;
 
-    @Schema(name = "集团id")
+    @Schema(description = "集团id")
     @Column(length = 40)
     private String blocid;
 
-    @Schema(name = "企业id")
+    @Schema(description = "企业id")
     @Column(length = 40)
     private String corpid;
 

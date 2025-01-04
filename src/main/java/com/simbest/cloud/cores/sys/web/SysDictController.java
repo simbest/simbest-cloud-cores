@@ -1,18 +1,11 @@
-/*
- * 版权所有 © 北京晟壁科技有限公司 2008-2027。保留一切权利!
- */
 package com.simbest.cloud.cores.sys.web;
 
-
 import com.simbest.cloud.cores.base.web.controller.LogicController;
-import com.simbest.cloud.cores.common.web.response.JsonResponse;
 import com.simbest.cloud.cores.exception.GlobalExceptionRegister;
+import com.simbest.cloud.cores.response.JsonResponse;
 import com.simbest.cloud.cores.sys.model.SysDict;
 import com.simbest.cloud.cores.sys.service.ISysDictService;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -20,9 +13,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Arrays;
 import java.util.List;
 
-
-import static com.simbest.cloud.cores.common.web.response.JsonResponse.SUCCESS_CODE;
 import static com.simbest.cloud.cores.constants.ApplicationConstants.MSG_SUCCESS;
+import static com.simbest.cloud.cores.response.JsonResponse.SUCCESS_CODE;
 
 
 /**
@@ -34,9 +26,7 @@ import static com.simbest.cloud.cores.constants.ApplicationConstants.MSG_SUCCESS
 @RestController
 @RequestMapping("/sys/dict")
 public class SysDictController extends LogicController<SysDict, String> {
-
     private ISysDictService sysDictService;
-
     @Autowired
     public SysDictController(ISysDictService sysDictService) {
         super(sysDictService);
@@ -84,7 +74,6 @@ public class SysDictController extends LogicController<SysDict, String> {
      */
     //@PreAuthorize("hasAnyAuthority('ROLE_SUPER','ROLE_ADMIN')")
     @Operation(summary = "根据id删除字典类型", description = "根据id删除字典类型")
-    @Parameter(name = "id", description = "字典类型ID", in = ParameterIn.QUERY)
     public JsonResponse deleteById(@RequestParam(required = false) String id) {
         try {
             sysDictService.deleteById(id);
@@ -132,9 +121,6 @@ public class SysDictController extends LogicController<SysDict, String> {
      * @return JsonResponse
      */
     @Operation(summary = "修改可见", description = "修改可见")
-    @Parameters ({@Parameter(name = "id", description = "字典类型ID", required = true, in = ParameterIn.QUERY),
-            @Parameter(name = "enabled", description = "是否可用", required = true,  in = ParameterIn.QUERY)
-    })
     @Override
     public JsonResponse updateEnable(@RequestParam(required = false) String id, @RequestParam(required = false) boolean enabled) {
         try {
@@ -145,7 +131,25 @@ public class SysDictController extends LogicController<SysDict, String> {
         }
     }
 
+    //批量修改可见
 
+//    /**
+//     * 注释原因：点击编辑字典时，不应该马上就提示操作成功
+//     *
+//     * 根据id查询字典类型信息
+//     * @param id
+//     * @return JsonResponse
+//     */
+//    @Operation(summary = "根据id查询字典类型信息", description = "根据id查询字典类型信息")
+//    @ApiImplicitParam(name = "id", value = "字典类型ID", dataType = "String", paramType = "query")
+//    @PostMapping(value = {"/findById","/findById/sso"})
+//    public JsonResponse findById(@RequestParam(required = false) String id) {
+//        JsonResponse response = super.findById( id );
+//        if(response.getErrcode().equals(SUCCESS_CODE)) {
+//            response.setMessage(MSG_SUCCESS);
+//        }
+//        return response;
+//    }
 
     /**
      *获取字典类型信息列表并分页
@@ -157,16 +161,6 @@ public class SysDictController extends LogicController<SysDict, String> {
      * @return JsonResponse
      */
     @Operation(summary = "获取字典类型信息列表并分页", description = "获取字典类型信息列表并分页")
-    @Parameters({ //
-            @Parameter(name = "page", description = "当前页码", in = ParameterIn.QUERY, //
-                    required = true, example = "1"), //
-            @Parameter(name = "size", description = "每页数量",  in = ParameterIn.QUERY, //
-                    required = true, example = "10"), //
-            @Parameter(name = "direction", description = "排序规则（asc/desc）",  //
-                    in = ParameterIn.QUERY), //
-            @Parameter(name = "properties", description = "排序规则（属性名称）",  //
-                    in = ParameterIn.QUERY) //
-    })
     @PostMapping(value = {"/findAll","/findAll/sso"})
     public JsonResponse findAll( @RequestParam(required = false, defaultValue = "1") int page, //
                                  @RequestParam(required = false, defaultValue = "10") int size, //
@@ -221,4 +215,19 @@ public class SysDictController extends LogicController<SysDict, String> {
     }
 
 
+   /* @Operation(summary = "查询字段树", description = "通过此接口来查询字段树信息")
+    @ApiImplicitParam(name = "id", value = "字典ID", required = true, dataType = "Long", paramType = "path")
+    @RequestMapping(value = "/select/tree", method = RequestMethod.GET)
+    public ModelAndView getSelectTree() {
+        // 获取查询结果
+        List<SysDict> pages = sysDictService.findByEnabled(true);
+
+        Map<String, Object> map = new HashMap<>();
+        map.put("list", pages);
+        map.put("size", pages.size());
+
+        Map<String, Object> maps = new HashMap<>();
+        maps.put("tree", map);
+        return new ModelAndView("sys/sysdict/chooseDictValue", "dictModel", maps);
+    }*/
 }

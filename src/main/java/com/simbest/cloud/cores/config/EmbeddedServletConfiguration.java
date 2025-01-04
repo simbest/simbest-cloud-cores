@@ -5,7 +5,6 @@ package com.simbest.cloud.cores.config;
 
 
 import com.simbest.cloud.cores.component.GracefulShutdown;
-import com.simbest.cloud.cores.util.SpringContextUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.catalina.connector.Connector;
 import org.apache.commons.lang3.StringUtils;
@@ -34,15 +33,15 @@ public class EmbeddedServletConfiguration {
     private AppConfig appConfig;
 
     @Autowired
-    private SpringContextUtil springContextUtil;
-
-    @Autowired
     private Environment env;
 
     @Value("${spring.servlet.multipart.max-file-size}")
     private String maxFileSize;
 
-
+    @Bean
+    public GracefulShutdown gracefulShutdown() {
+        return new GracefulShutdown(appConfig);
+    }
 
     @Bean
     public TomcatServletWebServerFactory containerFactory(final GracefulShutdown gracefulShutdown) {

@@ -1,8 +1,7 @@
 package com.simbest.cloud.cores.base.repository;
 
-
 import com.simbest.cloud.cores.constants.ApplicationConstants;
-import com.simbest.cloud.cores.util.ObjectUtil;
+import com.simbest.cloud.cores.utils.ObjectUtil;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Table;
 import jakarta.persistence.TypedQuery;

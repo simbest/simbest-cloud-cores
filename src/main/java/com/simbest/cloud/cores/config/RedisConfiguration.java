@@ -3,25 +3,25 @@
  */
 package com.simbest.cloud.cores.config;
 
-
-import com.alibaba.nacos.shaded.com.google.common.collect.Maps;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.simbest.cloud.cores.base.enums.StoreLocation;
-import com.simbest.cloud.cores.common.utils.encrypt.Des3Encryptor;
-import com.simbest.cloud.cores.common.web.response.ApiRequestHandle;
-import com.simbest.cloud.cores.common.web.response.JsonResponse;
+import com.google.common.collect.Maps;
 import com.simbest.cloud.cores.component.distributed.lock.DistributedLockFactoryBean;
 import com.simbest.cloud.cores.constants.ApplicationConstants;
+import com.simbest.cloud.cores.enums.StoreLocation;
 import com.simbest.cloud.cores.exception.Exceptions;
+import com.simbest.cloud.cores.json.JacksonUtils;
+import com.simbest.cloud.cores.redis.RedisUtil;
+import com.simbest.cloud.cores.response.ApiRequestHandle;
+import com.simbest.cloud.cores.response.JsonResponse;
 import com.simbest.cloud.cores.sys.model.SysDictValue;
-import com.simbest.cloud.cores.util.AppFileSftpUtil;
-import com.simbest.cloud.cores.util.RedisUtil;
-import com.simbest.cloud.cores.util.json.JacksonUtils;
+import com.simbest.cloud.cores.utils.encrypt.Des3Encryptor;
+import com.simbest.cloud.cores.utils.files.AppFileSftpUtil;
 import io.lettuce.core.ClientOptions;
 import io.lettuce.core.SocketOptions;
 import io.lettuce.core.cluster.ClusterClientOptions;
 import io.lettuce.core.cluster.ClusterTopologyRefreshOptions;
 import jakarta.annotation.PreDestroy;
+import jakarta.annotation.Resource;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
@@ -38,9 +38,6 @@ import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.boot.autoconfigure.AutoConfigureBefore;
-import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CachingConfigurerSupport;
@@ -48,8 +45,8 @@ import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.interceptor.CacheErrorHandler;
 import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
-import org.springframework.context.annotation.Primary;
 import org.springframework.core.env.MapPropertySource;
 import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
@@ -64,6 +61,7 @@ import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSeriali
 import org.springframework.data.redis.serializer.JdkSerializationRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+//import org.springframework.session.data.redis.config.annotation.web.http.EnableRedisHttpSession;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -80,25 +78,24 @@ import static com.simbest.cloud.cores.sys.model.SysDictValue.SYS_CONFIG;
  * 时间: 2018/5/1  18:56
  */
 @Slf4j
+@Configuration
 @EnableCaching
-@AutoConfiguration
-@AutoConfigureBefore(RedisAutoConfiguration.class)
+//@EnableRedisHttpSession
 public class RedisConfiguration extends CachingConfigurerSupport {
 
     public enum RedisConfigType {
         propertiesRedis,  ftpRedis, sftpRedis, dictValueRedis
     }
 
-    @Autowired
-    private AppConfig config;
+    @Autowired //@Resource
+    private AppConfig appConfig;
 
     @Autowired
     private RedisKeyGenerator redisKeyGenerator;
 
-
-
     private Des3Encryptor encryptor = new Des3Encryptor();
 
+    private ApiRequestHandle<SysDictValue> sysDictValueApiHandle = new ApiRequestHandle();
 
     private ApiRequestHandle<List<SysDictValue>> sysDictValueApiListHandle = new ApiRequestHandle();
 
@@ -108,6 +105,14 @@ public class RedisConfiguration extends CachingConfigurerSupport {
     @Getter
     private String redisClusterNodes;
 
+//    @Bean
+//    public JedisPoolConfig jedisPoolConfig() {
+//        JedisPoolConfig poolConfig = new JedisPoolConfig();
+//        poolConfig.setMaxTotal(100);
+//        poolConfig.setTestOnBorrow(true);
+//        poolConfig.setTestOnReturn(true);
+//        return poolConfig;
+//    }
 
     /**
      * @see RedisClusterConfiguration
@@ -117,7 +122,7 @@ public class RedisConfiguration extends CachingConfigurerSupport {
     public RedisClusterConfiguration redisClusterConfiguration(){
         Map<String, Object> source = Maps.newHashMap();
         source.put("spring.redis.cluster.nodes", redisClusterNodes);
-        source.put("spring.redis.cluster.max-redirects", config.getRedisMaxRedirects());
+        source.put("spring.redis.cluster.max-redirects", appConfig.getRedisMaxRedirects());
         return new RedisClusterConfiguration(new MapPropertySource("RedisClusterConfiguration", source));
     }
 
@@ -136,9 +141,9 @@ public class RedisConfiguration extends CachingConfigurerSupport {
                 .build();
 
         GenericObjectPoolConfig genericObjectPoolConfig = new GenericObjectPoolConfig();
-        genericObjectPoolConfig.setMaxTotal(config.getRedisPoolMaxTotal()); //最大连接数
-        genericObjectPoolConfig.setMaxIdle(config.getRedisPoolMaxIdle()); //最大空闲连接数
-        genericObjectPoolConfig.setMinIdle(config.getRedisPoolMinIdle());  //最小空闲连接数
+        genericObjectPoolConfig.setMaxTotal(appConfig.getRedisPoolMaxTotal()); //最大连接数
+        genericObjectPoolConfig.setMaxIdle(appConfig.getRedisPoolMaxIdle()); //最大空闲连接数
+        genericObjectPoolConfig.setMinIdle(appConfig.getRedisPoolMinIdle());  //最小空闲连接数
 
         return LettucePoolingClientConfiguration.builder()
                 .poolConfig(genericObjectPoolConfig)
@@ -167,25 +172,23 @@ public class RedisConfiguration extends CachingConfigurerSupport {
 //    }
 
     @Bean
-    @Primary
-    @Qualifier("redisConnectionFactory")
     public RedisConnectionFactory redisConnectionFactory() {
         LettuceConnectionFactory factory = null;
         try {
-            RedisConfigType redisConfigTypeEnum = Enum.valueOf(RedisConfigType.class, config.getRedisConfigType());
+            RedisConfigType redisConfigTypeEnum = Enum.valueOf(RedisConfigType.class, appConfig.getRedisConfigType());
             Assert.notNull(redisConfigTypeEnum, "Redis配置类型不能为空");
             log.info("缓存配置信息"+redisConfigTypeEnum.name());
             if(RedisConfigType.propertiesRedis.equals(redisConfigTypeEnum)){
                 log.info("基于配置文件读取Redis配置");
-                redisClusterNodes = config.getRedisClusterNodes();
+                redisClusterNodes = appConfig.getRedisClusterNodes();
             }
             else if(RedisConfigType.dictValueRedis.equals(redisConfigTypeEnum)){
                 log.info("基于数据库读取Redis配置");
-                log.debug("即将通过UUMS主数据【{}】读取Redis配置项【{}】的Redis节点信息", config.getUumsAddress(), config.getRedisConfigTypeRedis());
-                SysDictValue sysDictValue = SysDictValue.builder().dictType(SYS_CONFIG).name(config.getRedisConfigTypeRedis()).build();
+                log.debug("即将通过UUMS主数据【{}】读取Redis配置项【{}】的Redis节点信息", appConfig.getUumsAddress(), appConfig.getRedisConfigTypeRedis());
+                SysDictValue sysDictValue = SysDictValue.builder().dictType(SYS_CONFIG).name(appConfig.getRedisConfigTypeRedis()).build();
                 String loginuser = StringUtils.replace(encryptor.encrypt(ADMINISTRATOR), "+", "%2B");
 
-                String uumsUrl = config.getUumsAddress() + "/sys/dictValue/sso/findAllNoPage?loginuser="+loginuser+"&appcode="+UUMS_APPCODE;
+                String uumsUrl = appConfig.getUumsAddress() + "/sys/dictValue/sso/findAllNoPage?loginuser="+loginuser+"&appcode="+UUMS_APPCODE;
                 HttpUriRequest request = RequestBuilder.post().setUri(uumsUrl)
                         .setEntity(new StringEntity(JacksonUtils.obj2json(sysDictValue), ContentType.APPLICATION_JSON)).build();
                 CloseableHttpClient httpClient = HttpClients.createDefault();
@@ -197,7 +200,7 @@ public class RedisConfiguration extends CachingConfigurerSupport {
 //                        .asBean(JsonResponse.class);
 
                 List<SysDictValue> sysDictValueList = sysDictValueApiListHandle.handRemoteTypeReferenceResponse(jsonResponse, new TypeReference<List<SysDictValue>>(){});
-                Assert.notEmpty(sysDictValueList, String.format("通过字典类型%s和字典值名称%s，无法读取REDIS配置",SYS_CONFIG, config.getRedisConfigTypeRedis()));
+                Assert.notEmpty(sysDictValueList, String.format("通过字典类型%s和字典值名称%s，无法读取REDIS配置",SYS_CONFIG, appConfig.getRedisConfigTypeRedis()));
                 SysDictValue redisDv = sysDictValueList.get(ZERO);
                 Assert.notNull(redisDv, "REDIS节点配置不能为空！");
                 redisClusterNodes = redisDv.getValue();
@@ -205,20 +208,20 @@ public class RedisConfiguration extends CachingConfigurerSupport {
             else {
                 log.info("基于FTP文件读取Redis配置");
                 AppFileSftpUtil appFileSftpUtil = new AppFileSftpUtil();
-                appFileSftpUtil.setUsername(config.getRedisFtpUsername());
-                appFileSftpUtil.setPassword(config.getRedisFtpPassword());
-                appFileSftpUtil.setHost(config.getRedisFtpHost());
-                appFileSftpUtil.setPort(config.getRedisFtpPort());
-                appFileSftpUtil.setKeyFilePath(config.getRedisFtpKeyFile());
-                appFileSftpUtil.setPassphrase(config.getRedisFtpPassphrase());
+                appFileSftpUtil.setUsername(appConfig.getRedisFtpUsername());
+                appFileSftpUtil.setPassword(appConfig.getRedisFtpPassword());
+                appFileSftpUtil.setHost(appConfig.getRedisFtpHost());
+                appFileSftpUtil.setPort(appConfig.getRedisFtpPort());
+                appFileSftpUtil.setKeyFilePath(appConfig.getRedisFtpKeyFile());
+                appFileSftpUtil.setPassphrase(appConfig.getRedisFtpPassphrase());
                 if(RedisConfigType.ftpRedis.equals(redisConfigTypeEnum)){
                     appFileSftpUtil.setServerUploadLocation(StoreLocation.ftp);
                 }
                 if(RedisConfigType.sftpRedis.equals(redisConfigTypeEnum)){
                     appFileSftpUtil.setServerUploadLocation(StoreLocation.sftp);
                 }
-                redisClusterNodes = new String(appFileSftpUtil.download2Byte(config.getRedisFtpNodeConfigDirectory(),
-                        config.getRedisFtpNodeConfigFile()));
+                redisClusterNodes = new String(appFileSftpUtil.download2Byte(appConfig.getRedisFtpNodeConfigDirectory(),
+                        appConfig.getRedisFtpNodeConfigFile()));
             }
             redisClusterNodes = StringUtils.trimAllWhitespace(redisClusterNodes);
             Assert.notNull(redisClusterNodes, "REDIS节点配置不能为空！");
@@ -227,9 +230,9 @@ public class RedisConfiguration extends CachingConfigurerSupport {
             log.info("*************************Redis加载配置节点END********************************");
             if (redisClusterNodes.split(ApplicationConstants.COMMA).length == 1) {
                 RedisStandaloneConfiguration standaloneConfig = new RedisStandaloneConfiguration();
-                standaloneConfig.setHostName(redisClusterNodes.split(ApplicationConstants.COLON)[0]);
-                standaloneConfig.setPort(Integer.valueOf(redisClusterNodes.split(ApplicationConstants.COLON)[0]));
-                standaloneConfig.setPassword(RedisPassword.of(config.getRedisPassword()));
+                standaloneConfig.setHostName(redisClusterNodes.split(ApplicationConstants.COLON)[ZERO]);
+                standaloneConfig.setPort(Integer.valueOf(redisClusterNodes.split(ApplicationConstants.COLON)[ONE]));
+                standaloneConfig.setPassword(RedisPassword.of(appConfig.getRedisPassword()));
                 standaloneConfig.setDatabase(0);
                 factory = new LettuceConnectionFactory(standaloneConfig);
             } else {
@@ -253,8 +256,8 @@ public class RedisConfiguration extends CachingConfigurerSupport {
                 });
                 RedisClusterConfiguration clusterConfig = new RedisClusterConfiguration();
                 clusterConfig.setClusterNodes(redisNodes);
-                clusterConfig.setPassword(RedisPassword.of(config.getRedisPassword()));
-                clusterConfig.setMaxRedirects(Integer.parseInt(config.getRedisMaxRedirects()));
+                clusterConfig.setPassword(RedisPassword.of(appConfig.getRedisPassword()));
+                clusterConfig.setMaxRedirects(Integer.parseInt(appConfig.getRedisMaxRedirects()));
                 factory = new LettuceConnectionFactory(clusterConfig, getLettuceClientConfiguration());
             }
         }
@@ -265,7 +268,20 @@ public class RedisConfiguration extends CachingConfigurerSupport {
         return factory;
     }
 
-
+//    @Bean
+//    public RedisCacheConfiguration redisCacheConfiguration() {
+//        return RedisCacheConfiguration
+//                .defaultCacheConfig()
+//                .serializeKeysWith(
+//                        RedisSerializationContext
+//                                .SerializationPair
+//                                .fromSerializer(new StringRedisSerializer()))
+//                .serializeValuesWith(RedisSerializationContext.
+//                                SerializationPair.
+//                                fromSerializer(new JdkSerializationRedisSerializer(this.getClass().getClassLoader())))
+//                //默认1小时超时
+//                .entryTtl(Duration.ofSeconds(3600));
+//    }
 
 
     @Bean
@@ -275,7 +291,7 @@ public class RedisConfiguration extends CachingConfigurerSupport {
         RedisCacheWriter cacheWriter = RedisCacheWriter.nonLockingRedisCacheWriter(redisConnectionFactory());
         // 设置默认过期时间：60 分钟
         RedisCacheConfiguration defaultCacheConfig = RedisCacheConfiguration.defaultCacheConfig()
-                .entryTtl(Duration.ofSeconds(config.getSessionTimeout()))
+                .entryTtl(Duration.ofSeconds(appConfig.getSessionTimeout()))
                 //.prefixKeysWith("cache:key:uums:") //无法区分不同对象相同id时的key
                 // .disableCachingNullValues()
                 // 使用注解时的序列化、反序列化
@@ -289,14 +305,14 @@ public class RedisConfiguration extends CachingConfigurerSupport {
 
     @Bean
     @Qualifier("redisTemplate")
-    public <T> RedisTemplate<String, T> redisTemplate(@Autowired RedisConnectionFactory redisConnectionFactory) {
+    public <T> RedisTemplate<String, T> redisTemplate() {
         /**
          * 解决分离项目报空指针问题
          * 参考：https://www.jianshu.com/p/32d38a7fd20a
          */
         ClassLoader classLoader = this.getClass().getClassLoader();
         RedisTemplate<String, T> template = new RedisTemplate<>();
-        template.setConnectionFactory(redisConnectionFactory);
+        template.setConnectionFactory(redisConnectionFactory());
         template.setKeySerializer(new StringRedisSerializer());
         template.setValueSerializer(new JdkSerializationRedisSerializer(classLoader));
         template.setHashKeySerializer(new JdkSerializationRedisSerializer(classLoader));
@@ -382,7 +398,7 @@ public class RedisConfiguration extends CachingConfigurerSupport {
         Config redissonConfig = new Config();
         if (redisClusterNodes.split(ApplicationConstants.COMMA).length == 1) {
             redissonConfig.useSingleServer().setAddress("redis://"+redisClusterNodes)
-            .setPassword(config.getRedisPassword());
+            .setPassword(appConfig.getRedisPassword());
         } else {
             String[] nodes = redisClusterNodes.split(ApplicationConstants.COMMA);
             for(int i=0; i<nodes.length; i++){
@@ -390,7 +406,7 @@ public class RedisConfiguration extends CachingConfigurerSupport {
             }
             redissonConfig.useClusterServers()
                     .setScanInterval(2000) // cluster state scan interval in milliseconds
-                    .setPassword(config.getRedisPassword())
+                    .setPassword(appConfig.getRedisPassword())
                     .addNodeAddress(nodes);
 //                    .addNodeAddress("redis://10.92.80.70:26379", "redis://10.92.80.70:26389", "redis://10.92.80.70:26399")
 //                    .addNodeAddress("redis://10.92.80.71:26379", "redis://10.92.80.71:26389", "redis://10.92.80.71:26399");
@@ -412,7 +428,6 @@ public class RedisConfiguration extends CachingConfigurerSupport {
     public void destroy() {
         if(null != redissonClient) {
             log.debug("清理分布式事务锁START................................");
-
             RedisUtil.cleanRedisLock();
             log.debug("清理分布式事务锁END................................");
 //            redissonClient.shutdown(); //RedisConfiguration.redissonClient()申明创建出来的RedissonClient的shutdown执行真正的销毁redissonClient

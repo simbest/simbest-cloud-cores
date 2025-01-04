@@ -29,6 +29,15 @@ public interface ISysFileService extends ILogicService<SysFile, String> {
     SysFile uploadProcessFile(MultipartFile multipartFile, String pmInsType, String pmInsId, String pmInsTypePart);
 
     /**
+     * 浏览器更新上传单个文件
+     * @param multipartFile 上传文件
+     * @param pmInsId 流程ID
+     * @param id 附件ID
+     * @return SysFile
+     */
+    SysFile updateProcessFile(MultipartFile multipartFile, String pmInsId, String id);
+
+    /**
      * 上传并保存多个文件
      * @param multipartFiles 上传文件
      * @param pmInsType 流程类型
@@ -207,4 +216,16 @@ public interface ISysFileService extends ILogicService<SysFile, String> {
      * @param sysFileList
      */
     void addFilesToZip(File zipFile, List<SysFile> sysFileList);
+
+    /**
+     * 根据pmInsId查找SysFile
+     * @param pmInsId
+     */
+    List<SysFile> getFilesByPmInsId(String pmInsId);
+
+    /**
+     * 根据processInsId查找SysFile
+     * @param processInsId
+     */
+    List<SysFile> getFilesByProcessInsId(String processInsId);
 }

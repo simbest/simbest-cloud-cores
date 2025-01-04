@@ -56,7 +56,8 @@ public class ApplicationConstants {
     public static final String ANY_PASSWORD = "_anypassword_";
     //登录授权码的Redis缓存前缀
     public final static String REFINE_ANY_PASSWORD = "appAuthCode:%s:%s";
-
+    //新NSSO单点登录的Redis缓存前缀
+    public final static String NSSO_USER_ACCESS = "nsso:%s:%s:%s";
     public static final int ANY_PASSWORDTIME = 3600;
 
     public static final int DEFAULT_PAGE = 0;
@@ -114,8 +115,11 @@ public class ApplicationConstants {
     public static final String UUMS_APPCODE = "uums";
 
     public static final String MSG_SUCCESS = "操作成功";
-    public static final String MSG_ERRO = "操作失败";
-    public static final String MSG_FILE_CHECK = "fileOK";
+    public static final String MSG_FAIL = "操作失败";
+    public static final String MSG_ERROR = "操作异常";
 
+    public static final String MSG_FILE_CHECK = "fileOK";
     public static final String REST_TEMPLATE_PARM_FILE = "file";
+    public final static String REDISSON_REDIS_LOCK = "redisson_lock_";
+    public final static String REDISSON_LOCK_KEY_PREFIX = "redisson_lock_key_prefix_";
 }

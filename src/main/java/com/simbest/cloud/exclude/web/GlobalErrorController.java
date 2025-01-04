@@ -4,9 +4,9 @@
 package com.simbest.cloud.exclude.web;
 
 
-import com.simbest.cloud.cores.common.web.response.JsonResponse;
-import com.simbest.cloud.cores.util.json.GetJsonRequestUtil;
-import io.swagger.v3.oas.annotations.tags.Tag;
+
+import com.simbest.cloud.cores.response.JsonResponse;
+import com.simbest.cloud.cores.json.GetJsonRequestUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -37,7 +37,6 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
  * 作者: lishuyi
  * 时间: 2018/5/15  22:03
  */
-@Tag(name = "GlobalErrorController", description = "系统管理-全局异常日志管理")
 @Slf4j
 @RequestMapping("${server.error.path:${error.path:/error}}")
 public class GlobalErrorController extends AbstractErrorController {

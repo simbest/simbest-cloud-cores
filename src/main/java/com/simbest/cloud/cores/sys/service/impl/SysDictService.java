@@ -1,12 +1,14 @@
 package com.simbest.cloud.cores.sys.service.impl;
 
-
 import com.simbest.cloud.cores.base.service.impl.LogicService;
 import com.simbest.cloud.cores.exceptions.BusinessForbiddenException;
 import com.simbest.cloud.cores.sys.model.SysDict;
+import com.simbest.cloud.cores.sys.model.SysDictValue;
 import com.simbest.cloud.cores.sys.repository.SysDictRepository;
+import com.simbest.cloud.cores.sys.repository.SysDictValueRepository;
 import com.simbest.cloud.cores.sys.service.ISysDictService;
-import com.simbest.cloud.cores.util.SecurityUtils;
+import com.simbest.cloud.cores.sys.service.ISysDictValueService;
+import com.simbest.cloud.cores.security.utils.SecurityUtils;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
@@ -24,6 +26,9 @@ import static com.simbest.cloud.cores.constants.AuthoritiesConstants.*;
 public class SysDictService extends LogicService<SysDict, String> implements ISysDictService {
 
     private SysDictRepository dictRepository;
+
+    @Autowired
+    private SysDictValueRepository dictValueRepository;;
 
     @Autowired
     public SysDictService(SysDictRepository dictRepository ) {
@@ -90,10 +95,16 @@ public class SysDictService extends LogicService<SysDict, String> implements ISy
     @Override
     @Transactional
     public void deleteById(String id ) {
-        if(SecurityUtils.hasPermission(SUPER_ADMIN))
+        if(SecurityUtils.hasAnyPermission(new String[]{SUPER_ADMIN, ROLE_ADMIN})) {
+            SysDict sysDict = findById(id);
+            if (sysDict != null){
+                SysDictValue sysDictValue = SysDictValue.builder().dictType(sysDict.getDictType()).build();
+                dictValueRepository.delete(sysDictValue);
+            }
             super.deleteById(id);
-        else
+        }else {
             throw new AccessDeniedException(ACCESS_FORBIDDEN);
+        }
     }
 
     @Override
@@ -117,7 +128,19 @@ public class SysDictService extends LogicService<SysDict, String> implements ISy
     @Override
     @Transactional
     public void deleteAllByIds(Iterable<? extends String> pks ) {
-        throw new BusinessForbiddenException(BUSINESS_FORBIDDEN);
+        if(SecurityUtils.hasAnyPermission(new String[]{SUPER_ADMIN, ROLE_ADMIN})) {
+            //删除数据字典类型对应的枚举值
+            pks.forEach( pk -> {
+                SysDict sysDict = findById(pk);
+                if (sysDict != null){
+                    SysDictValue sysDictValue = SysDictValue.builder().dictType(sysDict.getDictType()).build();
+                    dictValueRepository.delete(sysDictValue);
+                }
+            });
+            super.deleteAllByIds(pks);
+        }else {
+            throw new BusinessForbiddenException(BUSINESS_FORBIDDEN);
+        }
     }
 
     @Override

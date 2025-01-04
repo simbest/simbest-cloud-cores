@@ -1,27 +1,30 @@
 package com.simbest.cloud.cores.sys.service.impl;
 
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
-import com.simbest.cloud.cores.base.enums.StoreLocation;
+import com.google.common.collect.Lists;
+
 import com.simbest.cloud.cores.base.service.impl.LogicService;
 import com.simbest.cloud.cores.config.AppConfig;
 import com.simbest.cloud.cores.constants.ApplicationConstants;
+import com.simbest.cloud.cores.enums.StoreLocation;
 import com.simbest.cloud.cores.exception.Exceptions;
 import com.simbest.cloud.cores.exceptions.AppRuntimeException;
 import com.simbest.cloud.cores.exceptions.BusinessForbiddenException;
+import com.simbest.cloud.cores.office.ExcelUtil;
 import com.simbest.cloud.cores.sys.model.SysFile;
 import com.simbest.cloud.cores.sys.model.UploadFileResponse;
 import com.simbest.cloud.cores.sys.repository.SysFileRepository;
 import com.simbest.cloud.cores.sys.service.ISysFileService;
-import com.simbest.cloud.cores.util.AppFileUtil;
-import com.simbest.cloud.cores.util.CodeGenerator;
-import com.simbest.cloud.cores.util.SecurityUtils;
-import com.simbest.cloud.cores.util.office.ExcelUtil;
+import com.simbest.cloud.cores.utils.*;
+import com.simbest.cloud.cores.utils.files.AppFileUtil;
+import com.simbest.cloud.cores.utils.files.FileUtils;
+import com.simbest.cloud.cores.security.utils.SecurityUtils;
 import jakarta.annotation.PostConstruct;
-import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.compress.utils.Lists;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.scheduling.annotation.Async;
@@ -39,7 +42,7 @@ import java.util.zip.ZipOutputStream;
 
 import static com.simbest.cloud.cores.config.MultiThreadConfiguration.MULTI_THREAD_BEAN;
 import static com.simbest.cloud.cores.sys.model.SysFile.*;
-import static com.simbest.cloud.cores.util.AppFileUtil.getFileName;
+import static com.simbest.cloud.cores.utils.files.AppFileUtil.getFileName;
 
 
 /**
@@ -54,19 +57,21 @@ public class SysFileService extends LogicService<SysFile, String> implements ISy
 
     public static final String FILE_ERROR = "文件操作异常【%s】";
 
-    private final SysFileRepository repository;
+    @Autowired
+    private SysFileRepository repository;
 
-    @Resource
+    @Autowired
     private AppFileUtil appFileUtil;
 
-    @Resource
+    @Autowired
     private AppConfig config;
 
     public StoreLocation serverUploadLocation;
 
-    public SysFileService(SysFileRepository sysFileRepository) {
-        super(sysFileRepository);
-        this.repository = sysFileRepository;
+    @Autowired
+    public SysFileService(SysFileRepository repository) {
+        super(repository);
+        this.repository = repository;
     }
 
     @PostConstruct
@@ -86,6 +91,40 @@ public class SysFileService extends LogicService<SysFile, String> implements ISy
     public SysFile uploadProcessFile(MultipartFile multipartFile, String pmInsType, String pmInsId, String pmInsTypePart) {
         List<SysFile> fileList = uploadProcessFiles(Arrays.asList(multipartFile), pmInsType, pmInsId, pmInsTypePart);
         return fileList.isEmpty() ? null : fileList.get(0);
+    }
+
+    /**
+     * 浏览器更新上传单个文件
+     * @param multipartFile 上传文件
+     * @param pmInsId 流程ID
+     * @param id 附件ID
+     * @return
+     */
+    @Override
+    public SysFile updateProcessFile(MultipartFile multipartFile, String pmInsId, String id) {
+        SysFile sysFile = null;
+        try {
+            sysFile = findById(id);
+            if (ObjectUtil.isNotEmpty(sysFile)){
+                String sourceFileFullPathAndName = sysFile.getFilePath();
+                String targetFileFullPathAndName = sysFile.getFilePath() + "_" + DateUtil.getCurrentStr();
+                String[] fileDirectoryAndName = FileUtils.extractFilePathAndName(sourceFileFullPathAndName);
+                //备份服务器文件，用原文件名+修改日期便于后续查找
+                FileUtils.copyFile(sourceFileFullPathAndName, targetFileFullPathAndName);
+                // 上传文件并覆盖
+                List<SysFile> sysFileList = appFileUtil.customUploadFiles(fileDirectoryAndName[0], Arrays.asList(multipartFile), fileDirectoryAndName[1]);
+                if (ObjectUtil.isNotEmpty(sysFileList)){
+                    //覆盖一下服务器文件上述的上传并修改不生效
+                    FileUtils.moveFile(sysFileList.get(ApplicationConstants.ZERO).getFilePath(), sourceFileFullPathAndName);
+                    // 修改原文件
+                    sysFile.setBackupPath(targetFileFullPathAndName);
+                    update(sysFile);
+                }
+            }
+        }catch (Exception e){
+            Exceptions.printException(e);
+        }
+        return sysFile;
     }
 
     /**
@@ -536,6 +575,38 @@ public class SysFileService extends LogicService<SysFile, String> implements ISy
                         sysFileList.stream().map(obj -> obj.getFileName()).collect(Collectors.joining(ApplicationConstants.COMMA)));
             }
         }
+    }
+
+    /**
+     * 根据pmInsId查找SysFile
+     * @param pmInsId
+     */
+    @Override
+    public List<SysFile> getFilesByPmInsId(String pmInsId) {
+        List<SysFile> sysFileList = Lists.newArrayList();
+        try {
+            sysFileList = repository.getFilesByPmInsId(pmInsId);
+        }catch (Exception e){
+            Exceptions.printException(e);
+        }
+        return sysFileList;
+    }
+
+    /**
+     * 根据processInsId查找SysFile
+     * @param processInsId
+     */
+    @Override
+    public List<SysFile> getFilesByProcessInsId(String processInsId) {
+
+        List<SysFile> sysFileList = Lists.newArrayList();
+        try {
+            String pmInsId = repository.getPmInsIdByProcessInsId(processInsId);
+            sysFileList = getFilesByPmInsId(pmInsId);
+        }catch (Exception e){
+            Exceptions.printException(e);
+        }
+        return sysFileList;
     }
 
     private void copyFile(File file, OutputStream os) throws IOException {

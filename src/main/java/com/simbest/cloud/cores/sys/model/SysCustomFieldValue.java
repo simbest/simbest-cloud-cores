@@ -4,13 +4,12 @@
 package com.simbest.cloud.cores.sys.model;
 
 
-import com.simbest.cloud.cores.base.annotations.EntityIdPrefix;
+import com.simbest.cloud.cores.annotations.EntityIdPrefix;
 import com.simbest.cloud.cores.base.model.LogicModel;
-import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
 
-
+import jakarta.persistence.*;
 
 /**
  * 用途：实体自定义字段值
@@ -23,13 +22,12 @@ import org.hibernate.annotations.GenericGenerator;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "sys_custom_field_value")
 public class SysCustomFieldValue extends LogicModel {
 
     @Id
     @Column(name = "id", length = 40)
     @GeneratedValue(generator = "snowFlakeId")
-    @GenericGenerator(name = "snowFlakeId", strategy = "com.simbest.cloud.cores.util.distribution.id.SnowflakeId")
+    @GenericGenerator(name = "snowFlakeId", strategy = "com.simbest.boot.util.distribution.id.SnowflakeId")
     @EntityIdPrefix(prefix = "V") //主键前缀，此为可选项注解
     private String id;
 

@@ -1,7 +1,9 @@
 package com.simbest.cloud.cores.sys.service.impl;
 
 import cn.hutool.core.util.StrUtil;
-import com.alibaba.nacos.shaded.com.google.common.collect.Maps;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+
 import com.simbest.cloud.cores.base.service.impl.LogicService;
 import com.simbest.cloud.cores.constants.ApplicationConstants;
 import com.simbest.cloud.cores.exceptions.BusinessForbiddenException;
@@ -10,26 +12,25 @@ import com.simbest.cloud.cores.sys.model.SysDictValue;
 import com.simbest.cloud.cores.sys.repository.SysDictValueRepository;
 import com.simbest.cloud.cores.sys.service.ISysDictService;
 import com.simbest.cloud.cores.sys.service.ISysDictValueService;
-import com.simbest.cloud.cores.util.ObjectUtil;
-import com.simbest.cloud.cores.util.SecurityUtils;
+import com.simbest.cloud.cores.utils.ObjectUtil;
+import com.simbest.cloud.cores.security.utils.SecurityUtils;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.compress.utils.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static com.simbest.cloud.cores.constants.ApplicationConstants.ONE;
 import static com.simbest.cloud.cores.constants.AuthoritiesConstants.*;
 
 
@@ -185,7 +186,7 @@ public class SysDictValueService extends LogicService<SysDictValue,String> imple
             }
             sysDictValueList = dataQuery.getResultList();
         }
-        if(!sysDictValueList.isEmpty()) {
+        if(sysDictValueList.size() > 0) {
             //判断字典值是否有默认值
             AtomicBoolean haveDefault = new AtomicBoolean(false);
             sysDictValueList.forEach( dv ->{
@@ -262,7 +263,7 @@ public class SysDictValueService extends LogicService<SysDictValue,String> imple
             for (SysDictValue v : list) {
                 updateEnable(enabled, v.getId());
             }
-            return ONE;
+            return ApplicationConstants.ONE;
         }
         else
             throw new AccessDeniedException(ACCESS_FORBIDDEN);
@@ -273,7 +274,7 @@ public class SysDictValueService extends LogicService<SysDictValue,String> imple
     public SysDictValue updateEnable (String id, boolean enabled) {
         if(SecurityUtils.hasAnyPermission(new String[]{SUPER_ADMIN, ROLE_ADMIN})) {
             int ret = this.updateEnable(enabled, id);
-            if(ONE == ret){
+            if(ApplicationConstants.ONE == ret){
                 return this.findById(id);
             }
             else{
@@ -363,7 +364,15 @@ public class SysDictValueService extends LogicService<SysDictValue,String> imple
     @Override
     @Transactional
     public void delete(SysDictValue o) {
-        throw new BusinessForbiddenException(BUSINESS_FORBIDDEN);
+        log.debug("删除的对象为【{}】",o);
+        if(SecurityUtils.hasAnyPermission(new String[]{SUPER_ADMIN, ROLE_ADMIN})) {
+            dvCacheUtil.expireAllCache();
+            //dictValueRepository.delete(o);
+            int ret = dictValueRepository.updateSatusBydictType(o.getDictType(), LocalDateTime.now(), LocalDateTime.now());
+            log.debug("已删除【{}】条数据字典枚举值",ret);
+        }else{
+            throw new BusinessForbiddenException(BUSINESS_FORBIDDEN);
+        }
     }
 
     @Override

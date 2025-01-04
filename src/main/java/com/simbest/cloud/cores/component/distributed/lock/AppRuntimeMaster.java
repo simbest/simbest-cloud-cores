@@ -3,13 +3,13 @@
  */
 package com.simbest.cloud.cores.component.distributed.lock;
 
+import com.google.common.collect.Maps;
 
-import com.alibaba.nacos.shaded.com.google.common.collect.Maps;
 import com.simbest.cloud.cores.config.AppConfig;
 import com.simbest.cloud.cores.constants.ApplicationConstants;
-import com.simbest.cloud.cores.util.RedisUtil;
-import com.simbest.cloud.cores.util.server.HostUtil;
-import com.simbest.cloud.cores.util.server.SocketUtil;
+import com.simbest.cloud.cores.redis.RedisUtil;
+import com.simbest.cloud.cores.utils.server.HostUtil;
+import com.simbest.cloud.cores.utils.server.SocketUtil;
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;

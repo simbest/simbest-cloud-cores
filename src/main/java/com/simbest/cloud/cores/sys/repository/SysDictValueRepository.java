@@ -1,12 +1,13 @@
 package com.simbest.cloud.cores.sys.repository;
 
-
 import com.simbest.cloud.cores.base.repository.LogicRepository;
 import com.simbest.cloud.cores.sys.model.SysDictValue;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -81,5 +82,7 @@ public interface SysDictValueRepository extends LogicRepository<SysDictValue, St
     @Query (value = sql7, nativeQuery = true)
     List<Map<String,String>> findDictValueMapList(@Param("typeList") String[] typeList);
 
-
+    @Modifying
+    @Query(value = "update SYS_DICT_VALUE t set t.modified_time=:modifiedTime,t.removed_time=:removedTime,t.enabled=0  where t.enabled=1 and t.dict_type=:dictType", nativeQuery = true)
+    int updateSatusBydictType(@Param( "dictType" ) String dictType, @Param( "modifiedTime" ) LocalDateTime modifiedTime, @Param( "removedTime" ) LocalDateTime removedTime);
 }

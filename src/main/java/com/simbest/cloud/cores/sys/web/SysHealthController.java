@@ -3,8 +3,7 @@
  */
 package com.simbest.cloud.cores.sys.web;
 
-
-import com.simbest.cloud.cores.common.web.response.JsonResponse;
+import com.simbest.cloud.cores.response.JsonResponse;
 import com.simbest.cloud.cores.sys.model.SysHealth;
 import com.simbest.cloud.cores.sys.service.IHeartTestService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -33,13 +32,6 @@ public class SysHealthController {
     @Operation(summary = "系统心跳", description = "系统心跳")
     @RequestMapping(value = "/anonymous/heart", method = {RequestMethod.HEAD})
     public JsonResponse healthHeart() {
-        return JsonResponse.defaultSuccessResponse();
-    }
-
-    @Operation(summary = "系统心跳健康检查", description = "系统心跳健康检查")
-    @RequestMapping(value = "/anonymous/headHeart", method = {RequestMethod.HEAD})
-    public JsonResponse healthHeadCheck() {
-        SysHealth sysHealth = heartTestService.doTest();
         return JsonResponse.defaultSuccessResponse();
     }
 

@@ -3,7 +3,6 @@
  */
 package com.simbest.cloud.cores.config;
 
-
 import com.simbest.cloud.cores.constants.ApplicationConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;

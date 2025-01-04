@@ -4,10 +4,10 @@ package com.simbest.cloud.cores.base.web.controller;
 import com.simbest.cloud.cores.base.model.GenericModel;
 import com.simbest.cloud.cores.base.repository.Condition;
 import com.simbest.cloud.cores.base.service.IGenericService;
-import com.simbest.cloud.cores.common.web.response.JsonResponse;
 import com.simbest.cloud.cores.exception.GlobalExceptionRegister;
-import com.simbest.cloud.cores.util.CustomBeanUtil;
-import com.simbest.cloud.cores.util.ObjectUtil;
+import com.simbest.cloud.cores.response.JsonResponse;
+import com.simbest.cloud.cores.utils.CustomBeanUtil;
+import com.simbest.cloud.cores.utils.ObjectUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -126,7 +126,7 @@ public class GenericController<T extends GenericModel, PK extends Serializable> 
     }
 
     @PostMapping(value = {"/deleteById", "/sso/deleteById", "/api/deleteById"})
-    public JsonResponse deleteById(@RequestParam PK id) {
+    public JsonResponse deleteById(@RequestParam(name="id") PK id) {
         try {
             service.deleteById(id);
             return JsonResponse.defaultSuccessResponse();

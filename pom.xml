@@ -6,27 +6,52 @@
     <parent>
         <groupId>com.simbest.cloud</groupId>
         <artifactId>simbest-cloud-parent</artifactId>
-        <version>0.1</version>
-        <relativePath>../simbest-cloud-parent</relativePath>
+        <version>1.0</version>
     </parent>
 
 	<groupId>com.simbest.cloud</groupId>
     <artifactId>simbest-cloud-cores</artifactId>
     <packaging>jar</packaging>
-	<version>0.3</version>
+	<version>${simbest.cloud.version}</version>
 
     <properties>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
     <dependencies>
         <dependency>
-            <groupId>com.simbest.cloud</groupId>
-            <artifactId>simbest-cloud-feign-uums</artifactId>
-            <version>0.3</version>
+            <groupId>com.simbest.boot</groupId>
+            <artifactId>simbest-boot-orguser</artifactId>
+            <version>${simbest.boot.version}</version>
         </dependency>
     </dependencies>
 
+    <repositories>
+        <repository>
+            <id>releases</id>
+            <url>http://10.87.57.26:8082/nexus/repository/releases/</url>
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>always</updatePolicy>
+            </releases>
+        </repository>
+        <repository>
+            <id>maven-thirdparty</id>
+            <url>http://10.87.57.26:8082/nexus/repository/maven-thirdparty/</url>
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>always</updatePolicy>
+            </releases>
+        </repository>
+    </repositories>
+
+    <distributionManagement>
+        <repository>
+            <id>releases</id>
+            <url>http://10.87.57.26:8082/nexus/repository/releases/</url>
+        </repository>
+        <snapshotRepository>
+            <id>maven-snapshots</id>
+            <url>http://10.87.57.26:8082/nexus/repository/maven-snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
 </project>

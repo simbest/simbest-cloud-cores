@@ -1,6 +1,5 @@
 package com.simbest.cloud.cores.sys.repository;
 
-
 import com.simbest.cloud.cores.base.repository.LogicRepository;
 import com.simbest.cloud.cores.sys.model.SysDict;
 import org.springframework.stereotype.Repository;

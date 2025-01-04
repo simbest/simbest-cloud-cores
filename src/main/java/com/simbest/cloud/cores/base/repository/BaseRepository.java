@@ -1,6 +1,5 @@
 package com.simbest.cloud.cores.base.repository;
 
-import com.simbest.cloud.cores.constants.ApplicationConstants;
 import com.simbest.cloud.cores.exception.Exceptions;
 import jakarta.persistence.Column;
 import jakarta.persistence.Id;
@@ -28,6 +27,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.simbest.cloud.cores.constants.ApplicationConstants.DEFAULT_PAGE;
 import static com.simbest.cloud.cores.constants.ApplicationConstants.DEFAULT_SIZE;
 
 /**
@@ -50,7 +50,7 @@ public interface BaseRepository<T, PK extends Serializable> extends JpaRepositor
 	Log logger = LogFactory.getLog(ProviderManager.class);
 
     default Pageable getPageable(){
-        return getPageable(ApplicationConstants.DEFAULT_PAGE, DEFAULT_SIZE);
+        return getPageable(DEFAULT_PAGE, DEFAULT_SIZE);
     }
 
     /**
