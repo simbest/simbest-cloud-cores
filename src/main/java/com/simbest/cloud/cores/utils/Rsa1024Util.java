@@ -13,6 +13,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
@@ -26,8 +27,8 @@ import java.util.List;
 @Slf4j
 @Component
 public class Rsa1024Util {
-    private final static String RSA_PUBLIC_KEY_PATH = "certificate/rsa/rsa_public_key.pem";
-    private final static String RSA_PRIVATE_KEY_PATH = "certificate/rsa/pkcs8_private_key.pem";
+    public final static String RSA1024_PUBLIC_KEY_PATH = "certificate/rsa/rsa_public_key.pem";
+    public final static String RSA1024_PRIVATE_KEY_PATH = "certificate/rsa/pkcs8_private_key.pem";
 
     private static Rsa1024Util rsaUtil;
     private RSAPrivateKey privateKey;
@@ -36,8 +37,8 @@ public class Rsa1024Util {
     @PostConstruct
     public void init() throws Exception {
         rsaUtil = this;
-        String public_key = getKeyFromFile(RSA_PUBLIC_KEY_PATH);
-        String private_key = getKeyFromFile(RSA_PRIVATE_KEY_PATH);
+        String public_key = getKeyFromFile(RSA1024_PUBLIC_KEY_PATH);
+        String private_key = getKeyFromFile(RSA1024_PRIVATE_KEY_PATH);
         loadPublicKey(public_key);
         loadPrivateKey(private_key);
     }
@@ -305,6 +306,29 @@ public class Rsa1024Util {
     private String doDecryptCode(String code) throws Exception {
         byte[] binaryData = decrypt(getPrivateKey(), org.apache.commons.codec.binary.Base64.decodeBase64(code) /*org.apache.commons.codec.binary.Base64.decodeBase64(base46String.getBytes())*/);
         return new String(binaryData);
+    }
+
+    public static void main(String[] args) throws Exception  {
+        Rsa1024Util rsaUtil = new Rsa1024Util();
+        String public_key = rsaUtil.getKeyFromFile(RSA1024_PUBLIC_KEY_PATH);
+        String private_key = rsaUtil.getKeyFromFile(RSA1024_PRIVATE_KEY_PATH);
+        rsaUtil.loadPublicKey(public_key);
+        rsaUtil.loadPrivateKey(private_key);
+        String base64PublicKey = Rsa2048Util.publicKeyToBase64(rsaUtil.publicKey);
+        String base64PrivateKey = Rsa2048Util.privateKeyToBase64(rsaUtil.privateKey);
+        System.out.println("publicKey-base64="+base64PublicKey);
+        System.out.println("privateKey-base64="+base64PrivateKey);
+
+        // 待加密数据
+        String data = "sjbg";
+        // 公钥加密
+        byte[] encrypt = rsaUtil.encrypt(rsaUtil.publicKey, data.getBytes());
+        // 私钥解密
+        byte[] decrypt = rsaUtil.decrypt(rsaUtil.privateKey, encrypt);
+        System.out.println("加密前:" + data);
+        System.out.println("明文length：" + data.length());
+        System.out.println("加密后:" + new String(encrypt, StandardCharsets.UTF_8));
+        System.out.println("解密后:" + new String(decrypt, StandardCharsets.UTF_8));
     }
 
 }

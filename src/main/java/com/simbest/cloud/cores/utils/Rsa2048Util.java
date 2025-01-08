@@ -1,5 +1,6 @@
 package com.simbest.cloud.cores.utils;
 
+import cn.hutool.core.codec.Base64Encoder;
 import com.simbest.cloud.cores.exception.Exceptions;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
@@ -13,6 +14,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
@@ -33,8 +35,8 @@ import java.util.List;
 @Slf4j
 @Component
 public class Rsa2048Util {
-    private final static String RSA_PUBLIC_KEY_PATH = "certificate/rsa/rsa_public_key_2048.pem";
-    private final static String RSA_PRIVATE_KEY_PATH = "certificate/rsa/pkcs8_rsa_private_key_2048.pem";
+    public final static String RSA2048_PUBLIC_KEY_PATH = "certificate/rsa/rsa_public_key_2048.pem";
+    public final static String RSA2048_PRIVATE_KEY_PATH = "certificate/rsa/pkcs8_rsa_private_key_2048.pem";
     public final static String RSA_KEY_ID = "MIIEvAIB!ADANB*gkqhkiG9w0@$BAQEFAA%SCBKYwggSiAgE#AAoIBAQC.0koGQh33lcPPW";
 
     private static Rsa2048Util rsaUtil;
@@ -44,8 +46,8 @@ public class Rsa2048Util {
     @PostConstruct
     public void init() throws Exception {
         rsaUtil = this;
-        String public_key = getKeyFromFile(RSA_PUBLIC_KEY_PATH);
-        String private_key = getKeyFromFile(RSA_PRIVATE_KEY_PATH);
+        String public_key = getKeyFromFile(RSA2048_PUBLIC_KEY_PATH);
+        String private_key = getKeyFromFile(RSA2048_PRIVATE_KEY_PATH);
         loadPublicKey(public_key);
         loadPrivateKey(private_key);
     }
@@ -315,7 +317,53 @@ public class Rsa2048Util {
         return new String(binaryData);
     }
 
+    /**
+     *
+     * @param key
+     * @return
+     * @author  Rommel
+     * @date    2023/10/5-11:22
+     * @version 1.0
+     * @description  公钥转base64字符串
+     */
+    public static String publicKeyToBase64(RSAPublicKey key){
+        return Base64Encoder.encode(key.getEncoded());
+    }
 
+    /**
+     *
+     * @param key
+     * @return
+     * @author  Rommel
+     * @date    2023/10/5-11:23
+     * @version 1.0
+     * @description  私钥转base64字符串
+     */
+    public static String privateKeyToBase64(RSAPrivateKey key){
+        return Base64Encoder.encode(key.getEncoded());
+    }
 
+    public static void main(String[] args) throws Exception  {
+        Rsa2048Util rsaUtil = new Rsa2048Util();
+        String public_key = rsaUtil.getKeyFromFile(RSA2048_PUBLIC_KEY_PATH);
+        String private_key = rsaUtil.getKeyFromFile(RSA2048_PRIVATE_KEY_PATH);
+        rsaUtil.loadPublicKey(public_key);
+        rsaUtil.loadPrivateKey(private_key);
+        String base64PublicKey = Rsa2048Util.publicKeyToBase64(rsaUtil.publicKey);
+        String base64PrivateKey = Rsa2048Util.privateKeyToBase64(rsaUtil.privateKey);
+        System.out.println("publicKey-base64="+base64PublicKey);
+        System.out.println("privateKey-base64="+base64PrivateKey);
+
+        // 待加密数据
+        String data = "111.com";
+        // 公钥加密
+        byte[] encrypt = rsaUtil.encrypt(rsaUtil.publicKey, data.getBytes());
+        // 私钥解密
+        byte[] decrypt = rsaUtil.decrypt(rsaUtil.privateKey, encrypt);
+        System.out.println("加密前:" + data);
+        System.out.println("明文length：" + data.length());
+        System.out.println("加密后:" + new String(encrypt, StandardCharsets.UTF_8));
+        System.out.println("解密后:" + new String(decrypt, StandardCharsets.UTF_8));
+    }
 
 }

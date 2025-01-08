@@ -15,7 +15,7 @@ import static com.simbest.cloud.cores.constants.ApplicationConstants.SLASH;
 @Slf4j
 @Data
 @Configuration
-//@RefreshScope
+@RefreshScope
 public class AppConfig {
     @Value("${app.oa.portal.token:SIMBEST_SSO}")
     private String mochaPortalToken;

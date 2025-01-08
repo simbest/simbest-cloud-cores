@@ -3,8 +3,8 @@
  */
 package com.simbest.cloud.cores.utils.encrypt;
 
-import com.simbest.cloud.cores.constants.ApplicationConstants;
 import com.simbest.cloud.cores.utils.BootAppFileReader;
+import com.simbest.cloud.cores.utils.Rsa1024Util;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -48,8 +48,8 @@ public class RsaEncryptor extends AbstractEncryptor {
 
     @PostConstruct
     public void init() throws Exception {
-        String public_key = getKeyFromFile(ApplicationConstants.RSA_PUBLIC_KEY_PATH);
-        String private_key = getKeyFromFile(ApplicationConstants.RSA_PRIVATE_KEY_PATH);
+        String public_key = getKeyFromFile(Rsa1024Util.RSA1024_PUBLIC_KEY_PATH);
+        String private_key = getKeyFromFile(Rsa1024Util.RSA1024_PRIVATE_KEY_PATH);
         loadPublicKey(public_key);
         loadPrivateKey(private_key);
     }
@@ -327,22 +327,14 @@ public class RsaEncryptor extends AbstractEncryptor {
 
     public static void main(String[] args) throws Exception {
         RsaEncryptor rsaEncryptor = new RsaEncryptor();
-        String public_key = rsaEncryptor.getKeyFromFile(ApplicationConstants.RSA_PUBLIC_KEY_PATH);
-        String private_key = rsaEncryptor.getKeyFromFile(ApplicationConstants.RSA_PRIVATE_KEY_PATH);
+        String public_key = rsaEncryptor.getKeyFromFile(Rsa1024Util.RSA1024_PUBLIC_KEY_PATH);
+        String private_key = rsaEncryptor.getKeyFromFile(Rsa1024Util.RSA1024_PRIVATE_KEY_PATH);
         rsaEncryptor.loadPublicKey(public_key);
         rsaEncryptor.loadPrivateKey(private_key);
-
-        Base64Encryptor base64Encryptor = new Base64Encryptor();
-        String str = "U0NSQW02SCtZOE9nNmlJYjZ1YVFxVzZpNDVtMWFtUlltZE8veEYrb1g2ZmlnWHdoaVhOSmhKVDlmSENCOFY2aWhuZklrTkJYVVo3K2ZVZTBZSnYrejQ0bWFZZjl2MVNvcXpPTXpFZlA1ejI1ZnlXNUFEbVhCODJ2RURabldQMDE1bGZmRUY3WUpRMXZ6TDl1RkUreTRmQUtseGlWcGQrR2IxSnFZK3Z3V2VBPQ==";
-        System.out.println("明文："+rsaEncryptor.decrypt(base64Encryptor.decrypt(str)));
-
-        String str1 = "2024-01-26 08:00:00";
-        System.out.println("密文："+base64Encryptor.encrypt(rsaEncryptor.encrypt(str1)));
-
         String source = "111.com";
         String code = rsaEncryptor.encrypt(source);
-        System.out.println(code);
+        System.out.println("密文：" + code);
         System.out.println("###########################");
-        System.out.println(rsaEncryptor.decryptCode(code));
+        System.out.println("明文：" + rsaEncryptor.decryptCode(code));
     }
 }
