@@ -6,8 +6,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Date;
-
 import static com.simbest.cloud.cores.constants.ApplicationConstants.MSG_SUCCESS;
 
 @RestController
@@ -21,7 +19,7 @@ public class RedisJwtValidatorController {
      */
     @RequestMapping(value = "/anonymous/getJwtExpiryDate", method = {RequestMethod.GET, RequestMethod.POST})
     public JsonResponse getJwtExpiryDate(@RequestParam("subject") String subject, @RequestParam("jwtId") String jwtId) {
-        Date expiryCache = RedisJwtValidator.getJwtExpiryDate(subject, jwtId);
+        Long expiryCache = RedisJwtValidator.getJwtExpiryDate(subject, jwtId);
         return JsonResponse.success(expiryCache, MSG_SUCCESS);
     }
 

@@ -91,7 +91,7 @@ public class SysCoresVersionController {
     @Operation(summary = "查看CORES组件当前版本", description = "查看CORES组件当前版本")
     @GetMapping(value = "/anonymous/cores")
     public JsonResponse version() {
-        return JsonResponse.success(String.format("【%s】-【%s】", "2025-01-11", "新增getCurrentUserInfo接口获取用户登录身份信息"), MSG_SUCCESS);
+        return JsonResponse.success(String.format("【%s】-【%s】", "2025-01-11", "本次升级内容：完善JWT验签健壮性"), MSG_SUCCESS);
     }
 
 
