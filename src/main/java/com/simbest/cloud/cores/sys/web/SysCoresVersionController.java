@@ -91,14 +91,7 @@ public class SysCoresVersionController {
     @Operation(summary = "查看CORES组件当前版本", description = "查看CORES组件当前版本")
     @GetMapping(value = "/anonymous/cores")
     public JsonResponse version() {
-        String versionContent = "oceanbase-client.2.4.9.jar";
-        try {
-            Class<?> aClass = Class.forName("com.oceanbase.jdbc.OceanBaseConnection");
-            versionContent = "检测到oceanbase-client.2.4.9.jar中的" + aClass.getSimpleName();
-        } catch (Exception e) {
-            versionContent = "未发现oceanbase-client.2.4.9.jar";
-        }
-        return JsonResponse.success(String.format("【%s】-【%s】", "2024-12-05", "本次升级内容：OB驱动检测结果：".concat(versionContent)), MSG_SUCCESS);
+        return JsonResponse.success(String.format("【%s】-【%s】", "2025-01-11", "新增getCurrentUserInfo接口获取用户登录身份信息"), MSG_SUCCESS);
     }
 
 

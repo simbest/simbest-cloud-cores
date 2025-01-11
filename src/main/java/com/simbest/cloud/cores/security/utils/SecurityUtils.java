@@ -38,7 +38,12 @@ public class SecurityUtils {
             else if (authentication.getPrincipal() instanceof Jwt) {
                 Jwt jwt = (Jwt) authentication.getPrincipal();
                 String subject = jwt.getSubject();
-                return iAuthService.findByKey(subject, IAuthService.KeyType.username);
+                if(StringUtils.isNotEmpty(subject)) {
+                    String username = rsaEncryptor.decrypt(subject);
+                    if(StringUtils.isNotEmpty(username)) {
+                        return iAuthService.findByKey(username, IAuthService.KeyType.username);
+                    }
+                }
             }
             else {
                 if (authentication.getPrincipal() != null) {

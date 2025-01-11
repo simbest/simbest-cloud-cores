@@ -6,6 +6,7 @@ package com.simbest.cloud.cores.security.utils;
 import cn.hutool.http.useragent.UserAgent;
 import cn.hutool.http.useragent.UserAgentUtil;
 import com.simbest.boot.security.IUser;
+import com.simbest.cloud.cores.base.model.CheckIpIsDevOpsResult;
 import com.simbest.cloud.cores.base.service.IGenericService;
 import com.simbest.cloud.cores.component.distributed.lock.AppRuntimeMaster;
 import com.simbest.cloud.cores.config.AppConfig;
@@ -38,6 +39,8 @@ import java.security.Principal;
 import java.util.LinkedHashMap;
 import java.util.Set;
 
+import static com.simbest.cloud.cores.constants.ApplicationConstants.COMMA;
+import static com.simbest.cloud.cores.constants.ApplicationConstants.STAR;
 import static com.simbest.cloud.cores.security.authtokens.LoginWebAuthenticationDetails.APPLY_USERNAME;
 
 
@@ -303,6 +306,27 @@ public class LoginUtils {
         return RedisUtil.getRedisTemplate().opsForSet().members(loginedUser);
     }
 
+    /**
+     * 检查当前请求的IP地址是否是合法运维IP地址
+     * @return
+     */
+    public static CheckIpIsDevOpsResult checkIpIsDevOps(String clientIp){
+        boolean checkFlag;
+        AppConfig appConfig = ApplicationContextProvider.getBean(AppConfig.class);
+        //  app.login.ip.white.list=* (IP地址合法)
+        if(!appConfig.getLoginWhiteIplist().isEmpty() && appConfig.getLoginWhiteIplist().size() == 1 && appConfig.getLoginWhiteIplist().get(0).equals(STAR)){
+            checkFlag = true;
+        }
+        // app.login.ip.white.list=10.87.57.23,10.87.57.46, 10.87.57.68 (IP地址合法)
+        else if(appConfig.getLoginWhiteIplist().contains(clientIp)){
+            checkFlag = true;
+        }
+        else{
+            checkFlag = false;
+        }
+        CheckIpIsDevOpsResult result = CheckIpIsDevOpsResult.builder().checkRet(checkFlag).whiteIps(String.join(COMMA, appConfig.getLoginWhiteIplist())).currentIp(clientIp).build();
+        return result;
+    }
 
     public static void main(String[] args) {
         String accountRegex = "sjbg|hadmin|hadmin1|hadmin2|hadmin3";

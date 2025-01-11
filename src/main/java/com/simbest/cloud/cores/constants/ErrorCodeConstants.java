@@ -19,4 +19,7 @@ public class ErrorCodeConstants {
 
     public static final Integer ERRORCODE_ATTACHMENT_SIZE_EXCEEDS = 20;
 
+    public static final String LOGIN_ERROR_OPT_IP = "checkIpIsDevOps维护终端IP校验失败，配置中心终端白名单【%s】，当前客户端终端IP地址【%s】，未经授权的维护终端访问。";
+
+
 }
