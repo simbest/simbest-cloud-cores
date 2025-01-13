@@ -45,6 +45,7 @@ public class AuthoritiesConstants {
     public static final String LOGIN_ERROR_PASSWORD = "3-账号密码认证错误"; //实则密码错误
     public static final String TOKEN_NOT_EXIST = "4-请求未携带访问令牌或系统内部错误";
     public static final String TOKEN_IS_EXPIRED = "5-访问令牌已过期";
+    public static final String TOKEN_AUTH_UNKNOWN = "6-获取访问令牌异常";
     public static final String AccountExpiredException = "账户已到期";
     public static final String DisabledException = "账号已禁用";
     public static final String LockedException = "账号已锁定";

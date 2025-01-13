@@ -154,6 +154,7 @@ public class JsonResponse<T>{
     public static JsonResponse fail(Object obj, String message, Integer errcode) {
         JsonResponse response = fail(obj);
         response.setMessage(message);
+        response.setErrcode(errcode);
         return response;
     }
 

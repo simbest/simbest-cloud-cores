@@ -13,13 +13,15 @@ import org.springframework.security.web.access.AccessDeniedHandler;
 
 import java.io.IOException;
 
+import static com.simbest.cloud.cores.constants.AuthoritiesConstants.TOKEN_AUTH_UNKNOWN;
+
 public class JsonAccessDeniedHandler implements AccessDeniedHandler {
 
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException, ServletException {
         SecurityContextHolder.clearContext();
         OAuth2Error errorResponse = new OAuth2Error(accessDeniedException.getMessage());
-        JsonResponse result = JsonResponse.fail(errorResponse);
+        JsonResponse result = JsonResponse.fail(errorResponse, TOKEN_AUTH_UNKNOWN, HttpStatus.UNAUTHORIZED.value());
         ResponseUtils.buildResponse(response, result, HttpStatus.UNAUTHORIZED);
     }
 }

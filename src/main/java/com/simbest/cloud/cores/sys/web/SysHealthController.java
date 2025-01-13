@@ -29,17 +29,22 @@ public class SysHealthController {
     @Autowired
     private IHeartTestService heartTestService;
 
-    @Operation(summary = "系统心跳", description = "系统心跳")
+    @Operation(summary = "匿名系统心跳", description = "匿名系统心跳")
     @RequestMapping(value = "/anonymous/heart", method = {RequestMethod.HEAD})
     public JsonResponse healthHeart() {
         return JsonResponse.defaultSuccessResponse();
     }
 
-    @Operation(summary = "系统健康检查", description = "系统健康检查")
+    @Operation(summary = "匿名系统健康检查", description = "匿名系统健康检查")
     @PostMapping(value = "/anonymous/check")
     public SysHealth healthCheck() {
         return heartTestService.doTest();
     }
 
+    @Operation(summary = "鉴权系统心跳", description = "鉴权系统心跳")
+    @RequestMapping(value = "/heart", method = {RequestMethod.GET, RequestMethod.POST})
+    public JsonResponse heart() {
+        return JsonResponse.defaultSuccessResponse();
+    }
 
 }

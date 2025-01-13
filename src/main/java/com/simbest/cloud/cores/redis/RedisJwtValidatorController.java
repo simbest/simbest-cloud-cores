@@ -17,7 +17,7 @@ public class RedisJwtValidatorController {
      * 可访问
      * @return
      */
-    @RequestMapping(value = "/anonymous/getJwtExpiryDate", method = {RequestMethod.GET, RequestMethod.POST})
+    @RequestMapping(value = "/getJwtExpiryDate", method = {RequestMethod.GET, RequestMethod.POST})
     public JsonResponse getJwtExpiryDate(@RequestParam("subject") String subject, @RequestParam("jwtId") String jwtId) {
         Long expiryCache = RedisJwtValidator.getJwtExpiryDate(subject, jwtId);
         return JsonResponse.success(expiryCache, MSG_SUCCESS);

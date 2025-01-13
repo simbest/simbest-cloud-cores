@@ -12,6 +12,7 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 
 import java.io.IOException;
 
+import static com.simbest.cloud.cores.constants.AuthoritiesConstants.TOKEN_AUTH_UNKNOWN;
 import static com.simbest.cloud.cores.constants.AuthoritiesConstants.TOKEN_NOT_EXIST;
 
 public class JsonClientAuthenticationFailedEntryPoint implements AuthenticationEntryPoint {
@@ -19,9 +20,9 @@ public class JsonClientAuthenticationFailedEntryPoint implements AuthenticationE
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
         if(authException instanceof InsufficientAuthenticationException){
-            ResponseUtils.buildResponse(response, JsonResponse.fail(TOKEN_NOT_EXIST), HttpStatus.UNAUTHORIZED);
+            ResponseUtils.buildResponse(response, JsonResponse.fail(TOKEN_NOT_EXIST, authException.getMessage(), HttpStatus.UNAUTHORIZED.value()), HttpStatus.UNAUTHORIZED);
         }else{
-            ResponseUtils.buildResponse(response, JsonResponse.fail(authException.getMessage()), HttpStatus.UNAUTHORIZED);
+            ResponseUtils.buildResponse(response, JsonResponse.fail(TOKEN_AUTH_UNKNOWN, authException.getMessage(), HttpStatus.UNAUTHORIZED.value()), HttpStatus.UNAUTHORIZED);
         }
     }
 
