@@ -13,7 +13,7 @@ import static com.simbest.cloud.cores.constants.ApplicationConstants.MSG_SUCCESS
 public class RedisJwtValidatorController {
 
     /**
-     * http://localhost:9003/authorder/jwt/anonymous/getJwtExpiryDate
+     * http://localhost:9003/authorder/jwt/getJwtExpiryDate
      * 可访问
      * @return
      */
