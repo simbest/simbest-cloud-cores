@@ -55,10 +55,10 @@ public class GenericController<T extends GenericModel, PK extends Serializable> 
     }
 
     @PostMapping(value = {"/findAll", "/sso/findAll", "/api/findAll"})
-    public JsonResponse findAll(@RequestParam(required = false, defaultValue = "1") int page, //
-                                @RequestParam(required = false, defaultValue = "10") int size, //
-                                @RequestParam(required = false) String direction, //
-                                @RequestParam(required = false) String properties,
+    public JsonResponse findAll(@RequestParam(required = false, defaultValue = "1",name = "page") int page, //
+                                @RequestParam(required = false, defaultValue = "10",name = "size") int size, //
+                                @RequestParam(required = false,name = "direction") String direction, //
+                                @RequestParam(required = false,name = "properties") String properties,
                                 @RequestBody T o) {
         //获取分页规则, page第几页 size每页多少条 direction升序还是降序 properties排序规则（属性名称）
         Pageable pageable = service.getPageable(page, size, direction, properties);
@@ -88,8 +88,8 @@ public class GenericController<T extends GenericModel, PK extends Serializable> 
     }
 
     @PostMapping(value = {"/findAllSortNoPage", "/sso/findAllSortNoPage", "/api/findAllSortNoPage"})
-    public JsonResponse findAllSortNoPage(@RequestParam(required = false) String direction,
-                                          @RequestParam(required = false) String properties,
+    public JsonResponse findAllSortNoPage(@RequestParam(required = false,name = "direction") String direction,
+                                          @RequestParam(required = false,name = "properties") String properties,
                                           @RequestBody T o) {
         // 获取查询条件
         Condition condition = new Condition();
