@@ -25,7 +25,7 @@ public class LogicController<T extends LogicModel, PK extends Serializable> exte
     }
 
     @PostMapping(value = {"/updateEnable", "/sso/updateEnable", "/api/updateEnable"})
-    public JsonResponse updateEnable(@RequestParam PK id, @RequestParam boolean enabled) {
+    public JsonResponse updateEnable(@RequestParam(name = "id") PK id, @RequestParam(name = "enabled")  boolean enabled) {
         return JsonResponse.success(service.updateEnable(id, enabled));
     }
 

@@ -37,7 +37,7 @@ public class GenericController<T extends GenericModel, PK extends Serializable> 
     }
 
     @PostMapping(value = {"/findById", "/sso/findById", "/api/findById"})
-    public JsonResponse findById(@RequestParam PK id) {
+    public JsonResponse findById(@RequestParam(name = "id") PK id) {
         return JsonResponse.success(service.findById(id));
     }
 
