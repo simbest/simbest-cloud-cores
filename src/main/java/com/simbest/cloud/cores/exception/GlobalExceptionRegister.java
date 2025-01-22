@@ -22,6 +22,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.Map;
 
@@ -50,6 +51,8 @@ public final class GlobalExceptionRegister {
                 JsonResponse.builder().errcode(HttpStatus.INTERNAL_SERVER_ERROR.value()).status(HttpStatus.INTERNAL_SERVER_ERROR.value()).error(HttpStatus.INTERNAL_SERVER_ERROR.name()).build());
         errorMap.put(HttpRequestMethodNotSupportedException.class,
                 JsonResponse.builder().errcode(HttpStatus.METHOD_NOT_ALLOWED.value()).status(HttpStatus.METHOD_NOT_ALLOWED.value()).error(HttpStatus.METHOD_NOT_ALLOWED.name()).message("请求方式错误").build());
+        errorMap.put(NoResourceFoundException.class,
+                JsonResponse.builder().errcode(HttpStatus.NOT_FOUND.value()).status(HttpStatus.NOT_FOUND.value()).error(HttpStatus.NOT_FOUND.name()).message("请求资源错误").build());
 
         //权限相关异常
         errorMap.put(AccessDeniedException.class,
@@ -93,7 +96,6 @@ public final class GlobalExceptionRegister {
      * @return 返回JsonResponse
      */
     public static JsonResponse returnErrorResponse(Exception e) {
-        Exceptions.printException(e);
         JsonResponse response = errorMap.get(e.getClass());
         if (response == null) {
             log.debug("当前异常为【{}】，父类异常为【{}】，异常信息为【{}】", e.getClass().getSimpleName(), e.getClass().getSuperclass().getSimpleName(), e.getMessage());
