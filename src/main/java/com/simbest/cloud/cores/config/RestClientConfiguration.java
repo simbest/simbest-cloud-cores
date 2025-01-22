@@ -5,6 +5,7 @@ package com.simbest.cloud.cores.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
@@ -35,6 +36,13 @@ public class RestClientConfiguration {
 
 //    @Value("${spring.servlet.multipart.max-file-size}")
 //    private String maxFileSize;
+
+    @LoadBalanced  // 负载均衡用
+    @Bean  // 将创建的对象注入到 spring 容器中去
+    public RestTemplate nacosRestTemplate(){
+        RestTemplate restTemplate = new RestTemplate();
+        return restTemplate;
+    }
 
     @Bean
     public RestTemplate restTemplate() {
