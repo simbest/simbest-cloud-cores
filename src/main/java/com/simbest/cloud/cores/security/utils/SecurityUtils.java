@@ -41,7 +41,9 @@ public class SecurityUtils {
                 if(StringUtils.isNotEmpty(subject)) {
                     String username = rsaEncryptor.decrypt(subject);
                     if(StringUtils.isNotEmpty(username)) {
-                        return iAuthService.findByKey(username, IAuthService.KeyType.username);
+                        IUser iUser = iAuthService.findByKey(username, IAuthService.KeyType.username);
+                        log.debug("通过账号【{}】获取用户身份信息为【{}】", username, iUser);
+                        return iUser;
                     }
                 }
             }
