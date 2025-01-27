@@ -21,19 +21,19 @@ public abstract class AbstractEncryptor {
     public static final String MD5 = "MD5";
 
     protected static void encryptBefore(String part) {
-        log.debug("++++++++++encrypt source before value is: " + part);
+        log.trace("++++++++++encrypt source before value is: " + part);
     }
 
     protected static void encryptAfter(String part) {
-        log.debug("++++++++++encrypt source after value is: " + part);
+        log.trace("++++++++++encrypt source after value is: " + part);
     }
 
     protected static void decryptBefore(String part) {
-        log.debug("----------decrypt source before value is: " + part);
+        log.trace("----------decrypt source before value is: " + part);
     }
 
     protected static void decryptAfter(String part) {
-        log.debug("----------decrypt source after value is: " + part);
+        log.trace("----------decrypt source after value is: " + part);
     }
 
     public String encrypt(String source) {
