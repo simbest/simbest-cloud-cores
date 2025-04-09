@@ -4,6 +4,7 @@
 package com.simbest.boot.util.distribution.id;
 
 
+import cn.hutool.core.util.ObjectUtil;
 import com.alibaba.nacos.shaded.com.google.common.base.Strings;
 import com.alibaba.nacos.shaded.com.google.common.collect.Maps;
 import com.simbest.boot.util.distribution.id.model.SysRedisIdKey;
@@ -128,7 +129,7 @@ public class RedisIdGenerator {
         //缓存没有
         if(null == currentIndex){
             log.debug("RedisNull-键值【{}】无法读取缓存", rediskey);
-            Map<String, Long> stringLongMap = rediskeyMap.get(today);
+            Map<String, Long> stringLongMap = ObjectUtil.isEmpty(rediskeyMap)? null : rediskeyMap.get(today);
             currentIndex = stringLongMap == null ? null : stringLongMap.get(rediskey);
             //缓存没有，JVM也没有，缓存和JVM都初始为0
             if (null == currentIndex) {
