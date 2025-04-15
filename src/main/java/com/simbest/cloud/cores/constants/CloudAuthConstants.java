@@ -8,7 +8,12 @@ public class CloudAuthConstants {
     public static final String OAUTH21_JWT = "oauth21:jwt:";
     public static final String OAUTH21_SUBJECT = "subject";
     public static final String OAUTH21_JWTID = "jwtId";
-    public static final String OAUTH21_CHECK_JWT_EXPIRE_DATETIME = "http://gateway/gateway/%s/jwt/getJwtExpiryDate";
-    public static final String OAUTH21_GET_JWT_TOKEN_EXPIRE_SECOND = "http://gateway/gateway/auth/client/anonymous/findClientTokenExpireSecond/%s";
+
+
+    // OAuth 2.1 API地址
+    // 应用到auth统一认证中心中检查JWT过期时间
+//    public static final String OAUTH21_CHECK_JWT_EXPIRE_DATETIME = "http://gateway/gateway/%s/jwt/getJwtExpiryDate";
+    public static final String OAUTH21_CHECK_JWT_EXPIRE_DATETIME = "/%s/jwt/anonymous/getJwtExpiryDate";
+
 
 }

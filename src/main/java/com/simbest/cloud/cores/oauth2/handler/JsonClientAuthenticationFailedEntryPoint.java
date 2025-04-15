@@ -15,6 +15,9 @@ import java.io.IOException;
 import static com.simbest.cloud.cores.constants.AuthoritiesConstants.TOKEN_AUTH_UNKNOWN;
 import static com.simbest.cloud.cores.constants.AuthoritiesConstants.TOKEN_NOT_EXIST;
 
+/**
+ * 未携带令牌访问失败处理类 JSON形式返回未授权
+ */
 public class JsonClientAuthenticationFailedEntryPoint implements AuthenticationEntryPoint {
 
     @Override
