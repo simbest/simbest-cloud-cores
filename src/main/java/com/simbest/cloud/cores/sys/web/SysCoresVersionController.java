@@ -91,7 +91,7 @@ public class SysCoresVersionController {
     @Operation(summary = "查看CORES组件当前版本", description = "查看CORES组件当前版本")
     @GetMapping(value = "/anonymous/cores")
     public JsonResponse version() {
-        return JsonResponse.success(String.format("【%s】-【%s】", "2025-01-27", "本次升级内容：增加获取用户信息日志"), MSG_SUCCESS);
+        return JsonResponse.success(String.format("【%s】-【%s】", "2025-04-14", "本次升级内容：增加网关地址，并给一个gateway网关的默认值！"), MSG_SUCCESS);
     }
 
 
