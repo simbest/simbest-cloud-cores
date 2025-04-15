@@ -37,7 +37,7 @@ public class AppConfig {
     private boolean isOpenValidateCode = true;
     @Value("${app.uums.address}")
     private String uumsAddress;
-    @Value("${app.gateway.address}")
+    @Value("${app.gateway.address:${app.host.port}/gateway}")
     private String gatewayAddress;
     // 是否开启心跳检测功能
     @Value("${app.heart.check.enable:false}")
