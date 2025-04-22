@@ -12,7 +12,7 @@ public class CloudAuthConstants {
 
     // OAuth 2.1 API地址
     // 应用到auth统一认证中心中检查JWT过期时间
-//    public static final String OAUTH21_CHECK_JWT_EXPIRE_DATETIME = "http://gateway/gateway/%s/jwt/getJwtExpiryDate";
+//    public static final String OAUTH21_CHECK_JWT_EXPIRE_DATETIME = "http://gateway/gateway/%s/jwt/anonymous/getJwtExpiryDate";
     public static final String OAUTH21_CHECK_JWT_EXPIRE_DATETIME = "/%s/jwt/anonymous/getJwtExpiryDate";
 
 

@@ -31,11 +31,11 @@ public class JwtController {
     private JwtDecoder jwtDecoder;
 
     /**
-     * http://localhost:9003/authorder/jwt/getJwtExpiryDate
-     * 基于Authorization   Bearer ${access_token}
+     * http://localhost:9003/authorder/jwt/anonymous/getJwtExpiryDate
+     * 可匿名访问
      * @return
      */
-    @RequestMapping(value = "/getJwtExpiryDate", method = {RequestMethod.GET, RequestMethod.POST})
+    @RequestMapping(value = "/anonymous/getJwtExpiryDate", method = {RequestMethod.GET, RequestMethod.POST})
     public JsonResponse getJwtExpiryDate(@RequestParam("subject") String subject, @RequestParam("jwtId") String jwtId) {
         Long expiryCache = RedisJwtValidator.getJwtExpiryDate(subject, jwtId);
         return JsonResponse.success(expiryCache, MSG_SUCCESS);
