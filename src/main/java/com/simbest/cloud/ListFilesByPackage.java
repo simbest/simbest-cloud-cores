@@ -1,4 +1,6 @@
-﻿package com.simbest.cloud;
+package com.simbest.cloud;
+
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -11,8 +13,6 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.List;
 
-import lombok.extern.slf4j.Slf4j;
-
 /**
  * Java文件列表生成工具类
  * 根据指定的package名称，递归遍历该package目录及其子目录下的所有Java文件，
@@ -23,7 +23,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class ListFilesByPackage {
-
+    
     /**
      * Java文件信息内部类
      */
@@ -47,10 +47,10 @@ public class ListFilesByPackage {
     public static void main(String[] args) {
         // 源代码路径
         String srcPath = "src/main/java";
-        
+
         // 输出文件路径
         String outputPath = "docs/PackageFiles.md";
-        
+
         // 固定的包名
         String packageName = "com.simbest.cloud.cores.utils";
 
@@ -64,7 +64,7 @@ public class ListFilesByPackage {
 
             // 检查起始路径是否存在
             if (!Files.exists(startPath)) {
-                log.error("指定的包路径不存在: " + startPath);
+                log.warn("指定的包路径不存在: {}", startPath);
                 return;
             }
 
@@ -95,7 +95,7 @@ public class ListFilesByPackage {
 
                 @Override
                 public FileVisitResult visitFileFailed(Path file, IOException exc) {
-                    log.error("访问文件失败: " + file, exc);
+                    log.warn("访问文件失败: {}, 错误: {}", file, exc.getMessage());
                     return FileVisitResult.CONTINUE;
                 }
             });
@@ -127,7 +127,7 @@ public class ListFilesByPackage {
             }
 
         } catch (IOException e) {
-            log.error("生成文件列表时发生错误", e);
+            log.error("生成文件列表时发生错误: {}", e.getMessage());
         }
     }
 }
