@@ -1,0 +1,18 @@
+{
+  "projectTitle": "Simbest Cloud Cores",
+  "description": "Simbest Cloud Cores is a cloud platform core component library developed by Beijing Simbest Technology Co., Ltd., providing common functional modules and infrastructure support under a microservice architecture.",
+  "folders": [
+    "src/main/java/com/simbest/",
+    "docs/"
+  ],
+  "excludeFolders": [
+    "src/test/"
+  ],
+  "excludeFiles": [
+    ".gitignore",
+    "pom.xml",
+    "README.md",
+    "*.bat"
+  ],
+  "rules": []
+}
