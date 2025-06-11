@@ -18,7 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 @Configuration
 @RefreshScope
 public class AppConfig {
-    @Value("${app.oa.portal.token:SIMBEST_SSO}")
+    @Value("${app.oa.portal.token:}")
     private String mochaPortalToken;
     @Value("${logback.artifactId}")
     private String appcode;
@@ -50,30 +50,30 @@ public class AppConfig {
     private String cleanCacheUserTime;
     @Value("${app.login.ip.white.list:localhost}")
     private List<String> loginWhiteIplist;
-    @Value("${app.record.exclude.account:sjbg|hadmin|hadmin1|hadmin2|hadmin3}")
+    @Value("${app.record.exclude.account:}")
     private String excludeAccounts;
-    @Value("${app.record.exclude.ip:10.87.57.*,10.87.41.139,10.87.41.140,10.87.41.141,10.87.41.142,10.87.41.144}")
+    @Value("${app.record.exclude.ip:}")
     private String excludeIps;
 
     @Value("${app.a4.logserver.on:false}")
     private Boolean a4LogserverOn;
-    @Value("${app.a4.logserver.ip:10.96.23.1}")
+    @Value("${app.a4.logserver.ip:}")
     private String a4LogserverIp;
     @Value("${app.a4.logserver.port:22}")
     private String a4LogserverPort;
     @Value("${app.a4.logserver.account:host}")
     private String a4LogserverAccount;
-    @Value("${app.a4.logserver.password:5*QCKxJM}")
+    @Value("${app.a4.logserver.password:}")
     private String a4LogserverPassword;
     public static final String DEFAULT_4A_LOGFILE_PATH = "/home/aiuap/gather/";
     @Value("${app.a4.logserver.filePath:/home/aiuap/gather/}") // 需要应用侧进行配置，如：/home/aiuap/gather/MGDICT/
     private String a4LogserverFilePath;
-    @Value("#{'${app.a4.sendFile.fail.noticers:sjbg,hadmin2}'.split(',')}")
+    @Value("#{'${app.a4.sendFile.fail.noticers:}'.split(',')}")
     private List<String> a4LogSendFailNoticers;
 
     @Value("${app.sso.force.time:false}")
     private Boolean ssoForceTime;
-    @Value("${app.sso.salt:Xianzai@2099}")
+    @Value("${app.sso.salt:}")
     private String ssoSalt;
     @Value("${app.sso.time:1}")
     private Integer ssoTime; // 默认1分钟，即单点支持前后2分钟
@@ -179,11 +179,11 @@ public class AppConfig {
     private String fileDirYmdFlag;
 
     // 简单实时短信接口配置
-    @Value("${app.sms.account:8a48b5515018a0f40150467da6134cddsim}")
+    @Value("${app.sms.account:}")
     private String smsAccount;
-    @Value("${app.sms.token:6cde887f4355445fa2c16f9fb073fbf7be}")
+    @Value("${app.sms.token:}")
     private String smsToken;
-    @Value("${app.sms.appId:8a48b5515018a0f4015046d3765c4ea3st}")
+    @Value("${app.sms.appId:}")
     private String smsAppId;
     @Value("${app.sms.templateId:408992008}")
     private String smsTemplateId;
@@ -200,7 +200,8 @@ public class AppConfig {
     @Value("${spring.data.mongodb.password:}")
     private String mongodbPassword;
 
-    @Value("${app.cloud.auth.public.key:MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDI90D8sRwU5rwagj9fgNQAFH/Ws03jR+qYUUtA3iI05IaqDLrVDdvMQU446/6c+nyJBtdO3P95+dLg7UVQn1bQSj1wLWa5nuJvTh5paBe1XWZj/HmISTpq+OhyGKmX5xNRU96fDld03JyrgEbmHb9T8jks7g5FhKmZmLJBeRTpoQIDAQAB}")
+    //@Value("${app.cloud.auth.public.key:MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDI90D8sRwU5rwagj9fgNQAFH/Ws03jR+qYUUtA3iI05IaqDLrVDdvMQU446/6c+nyJBtdO3P95+dLg7UVQn1bQSj1wLWa5nuJvTh5paBe1XWZj/HmISTpq+OhyGKmX5xNRU96fDld03JyrgEbmHb9T8jks7g5FhKmZmLJBeRTpoQIDAQAB}")
+    @Value("${app.cloud.auth.public.key:}")
     private String cloudPublicKey;
 
     @PostConstruct
