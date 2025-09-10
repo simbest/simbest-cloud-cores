@@ -5,6 +5,7 @@ import com.google.common.collect.Sets;
 import com.simbest.boot.security.*;
 import com.simbest.cloud.cores.config.AppConfig;
 import com.simbest.cloud.cores.constants.ApplicationConstants;
+import com.simbest.cloud.cores.constants.AuthoritiesConstants;
 import com.simbest.cloud.cores.redis.RedisUtil;
 import com.simbest.cloud.cores.security.authtokens.GenericAuthentication;
 import com.simbest.cloud.cores.security.authtokens.UumsAuthenticationCredentials;
@@ -21,13 +22,10 @@ import org.springframework.security.core.SpringSecurityMessageSource;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-//import org.springframework.session.data.redis.RedisIndexedSessionRepository;
 import org.springframework.util.Assert;
 
 import java.util.Map;
 import java.util.Set;
-
-import com.simbest.cloud.cores.constants.AuthoritiesConstants;
 
 /**
  * 用途：抽象的认证服务

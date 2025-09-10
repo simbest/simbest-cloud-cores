@@ -5,6 +5,8 @@ package com.simbest.cloud.cores.security.utils;
 
 import cn.hutool.http.useragent.UserAgent;
 import cn.hutool.http.useragent.UserAgentUtil;
+import com.simbest.boot.security.IAuthService;
+import com.simbest.boot.security.IAuthService.KeyType;
 import com.simbest.boot.security.IUser;
 import com.simbest.cloud.cores.base.model.CheckIpIsDevOpsResult;
 import com.simbest.cloud.cores.base.service.IGenericService;
@@ -12,10 +14,7 @@ import com.simbest.cloud.cores.component.distributed.lock.AppRuntimeMaster;
 import com.simbest.cloud.cores.config.AppConfig;
 import com.simbest.cloud.cores.constants.ApplicationConstants;
 import com.simbest.cloud.cores.redis.RedisUtil;
-import com.simbest.cloud.cores.security.authtokens.LoginWebAuthenticationDetails;
-import com.simbest.cloud.cores.security.authtokens.SsoUsernameAuthentication;
-import com.simbest.cloud.cores.security.authtokens.UumsAuthentication;
-import com.simbest.cloud.cores.security.authtokens.UumsAuthenticationCredentials;
+import com.simbest.cloud.cores.security.authtokens.*;
 import com.simbest.cloud.cores.security.principals.UsernamePrincipal;
 import com.simbest.cloud.cores.sys.model.SysLogLogin;
 import com.simbest.cloud.cores.sys.model.SysLogLoginAdmin;
@@ -112,7 +111,12 @@ public class LoginUtils {
      * 管理员认证
      */
     public void adminLogin() {
-        manualLogin(ApplicationConstants.ADMINISTRATOR, appConfig.getAppcode());
+        log.debug("通过管理账号【{}】进行系统自动登录", "hadmin");
+        IAuthService authService = ApplicationContextProvider.getBean(IAuthService.class);
+        IUser iUser = authService.findByKey("hadmin", KeyType.username);
+        GenericAuthentication auth = new GenericAuthentication(iUser, (UumsAuthenticationCredentials)null, iUser.getAuthorities());
+        SecurityContext sc = SecurityContextHolder.getContext();
+        sc.setAuthentication(auth);
     }
 
     /**
