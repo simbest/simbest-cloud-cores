@@ -14,8 +14,10 @@ import com.simbest.cloud.cores.component.distributed.lock.AppRuntimeMaster;
 import com.simbest.cloud.cores.config.AppConfig;
 import com.simbest.cloud.cores.constants.ApplicationConstants;
 import com.simbest.cloud.cores.redis.RedisUtil;
-import com.simbest.cloud.cores.security.authtokens.*;
-import com.simbest.cloud.cores.security.principals.UsernamePrincipal;
+import com.simbest.cloud.cores.security.authtokens.GenericAuthentication;
+import com.simbest.cloud.cores.security.authtokens.LoginWebAuthenticationDetails;
+import com.simbest.cloud.cores.security.authtokens.UumsAuthentication;
+import com.simbest.cloud.cores.security.authtokens.UumsAuthenticationCredentials;
 import com.simbest.cloud.cores.sys.model.SysLogLogin;
 import com.simbest.cloud.cores.sys.model.SysLogLoginAdmin;
 import com.simbest.cloud.cores.sys.service.ISysLogLoginService;
@@ -34,7 +36,6 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
-import java.security.Principal;
 import java.util.LinkedHashMap;
 import java.util.Set;
 
@@ -56,9 +57,9 @@ public class LoginUtils {
     @Autowired
     private AppConfig appConfig;
 
-//    @Autowired
-//    private AuthenticationManager authenticationManager;
-
+/*    @Autowired
+    @Qualifier(BeanIds.AUTHENTICATION_MANAGER)
+    private AuthenticationManager authenticationManager;*/
 //    @Autowired
 //    protected IAuthService authService;
 
@@ -81,13 +82,12 @@ public class LoginUtils {
      */
     public void manualLogin(String username, String appcode) {
         log.debug("通过用户名【{}】和应用编码【{}】进行系统自动登录", username, appcode);
-        String rawUsername = SecurityUtils.decryptorUserName(username);
-        Principal principal = UsernamePrincipal.builder().username(rawUsername).build();
-        SsoUsernameAuthentication authReq = new SsoUsernameAuthentication(principal, appcode);
-        AuthenticationManager authenticationManager = ApplicationContextProvider.getBean(AuthenticationManager.class);
-        Authentication auth = authenticationManager.authenticate(authReq);
-        SecurityContext sc = SecurityContextHolder.getContext();
-        sc.setAuthentication(auth);
+        IAuthService authService = ApplicationContextProvider.getBean(IAuthService.class);
+        IUser iUser = authService.findByKey(username, KeyType.username);
+        GenericAuthentication auth = new GenericAuthentication(iUser, (UumsAuthenticationCredentials)null, iUser.getAuthorities());
+        SecurityContext context = SecurityContextHolder.createEmptyContext();
+        context.setAuthentication(auth);
+        SecurityContextHolder.setContext(context);
     }
 
     /**
@@ -112,11 +112,7 @@ public class LoginUtils {
      */
     public void adminLogin() {
         log.debug("通过管理账号【{}】进行系统自动登录", "hadmin");
-        IAuthService authService = ApplicationContextProvider.getBean(IAuthService.class);
-        IUser iUser = authService.findByKey("hadmin", KeyType.username);
-        GenericAuthentication auth = new GenericAuthentication(iUser, (UumsAuthenticationCredentials)null, iUser.getAuthorities());
-        SecurityContext sc = SecurityContextHolder.getContext();
-        sc.setAuthentication(auth);
+        manualLogin("hadmin", appConfig.getAppcode());
     }
 
     /**

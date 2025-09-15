@@ -1,5 +1,6 @@
 package com.simbest.cloud.cores.security.service;
 
+import cn.hutool.core.util.ObjectUtil;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.simbest.boot.security.*;
@@ -74,7 +75,7 @@ public abstract class AbstractAuthService implements IAuthService {
     @Override
     public IUser findByKey(String keyword, KeyType keyType) {
         IUser user = authUserCacheService.loadCacheUser(keyword);
-        if(null == user) {
+        if(ObjectUtil.isEmpty(user)) {
             user = reloadUserFromUums(keyword, keyType);
         }
         else{
