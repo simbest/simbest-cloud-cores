@@ -299,11 +299,7 @@ public class LogicService<T extends LogicModel,PK extends Serializable> extends 
     }
 
     protected void wrapUpdateInfo(T o) {
-        String modifier = o.getModifier();
-        if(StringUtils.isEmpty(modifier)){
-            modifier = SecurityUtils.getCurrentUserName();
-        }
-        o.setModifier(modifier);
+        o.setModifier(SecurityUtils.getCurrentUserName());
     }
 
 

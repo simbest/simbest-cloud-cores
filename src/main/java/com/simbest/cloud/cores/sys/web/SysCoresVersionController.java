@@ -91,7 +91,7 @@ public class SysCoresVersionController {
     @Operation(summary = "查看CORES组件当前版本", description = "查看CORES组件当前版本")
     @GetMapping(value = "/anonymous/cores")
     public JsonResponse version() {
-        return JsonResponse.success(String.format("【%s】-【%s】", "2025-04-22", "本次升级内容：修改JwtController的getJwtExpiryDate续签地址！"), MSG_SUCCESS);
+        return JsonResponse.success( String.format("【%s】-【%s】", "2026-05-21", "本次升级内容：修复 LogicService 更新逻辑中 modifier 未随本次修改刷新问题，更新时统一写入当前登录用户"), MSG_SUCCESS);
     }
 
 
